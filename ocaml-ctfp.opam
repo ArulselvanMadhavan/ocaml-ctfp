@@ -1,0 +1,22 @@
+opam-version: "2.0"
+version: "0.0.1"
+synopsis: "OCaml code snippets for Category Theory For Programmers"
+maintainer: "Arul Madhavan <arul.madhavan@arulmadhavan-MBP-3876.local>"
+authors: "Arul Madhavan <arul.madhavan@arulmadhavan-MBP-3876.local>"
+license: "GPL 3.0"
+homepage: "https://github.com/ArulselvanMadhavan/ocaml-ctfp"
+bug-reports: "https://github.com/ArulselvanMadhavan/ocaml-ctfp/issues"
+depends: [
+  "ocaml" {>= "4.07.1"}
+  "dune" {build}
+]
+build: [
+ # ["dune" "subst"] {pinned}
+ ["dune" "build" "-p" name "-j" jobs]
+ ["dune" "runtest" "-p" name] {with-test}  
+]
+install: [make "install"]
+dev-repo: "git+https://"
+url {
+  src: "git+file:///Users/arul.madhavan/dev/ocaml-projects/ocaml-ctfp#master"
+}

@@ -1,7 +1,19 @@
 (rule
   (targets playground.ml)
   (deps    playground.md)
-  (action  (with-stdout-to %{targets} (run ocaml-mdx pp %{deps}))))
+  (action
+    (progn     
+      (with-stdout-to %{targets} (run ocaml-mdx pp %{deps})))))
 
 (executable
   (name playground))
+
+(rule
+  (with-stdout-to playground.md.out (run ./playground.exe)))
+  
+(alias
+ (name   runtest)
+ (deps   (:x playground.md.out) (:y playground.md.out.expected))
+ (action (progn
+           (run ocaml-mdx test --direction=infer-timestamp %{x})
+           (diff %{x} %{y}))))
