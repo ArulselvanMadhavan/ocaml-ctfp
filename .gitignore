@@ -1,2 +1,3 @@
 _opam/**
-*/_build/**
+**/_build/**
+**/.merlin

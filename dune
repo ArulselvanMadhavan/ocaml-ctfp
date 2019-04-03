@@ -1,0 +1,9 @@
+(alias
+  (name generate)
+  (deps chapter1.ml))
+
+(rule
+  (targets chapter1/chapter.ml)
+  (deps chapter1/chapter1.md)
+  (action
+    (run ocaml-mdx )))

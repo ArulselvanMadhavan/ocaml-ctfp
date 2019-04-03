@@ -1,0 +1,9 @@
+lib: [
+  "_build/install/default/lib/ocaml-ctfp/META" {"META"}
+  "_build/install/default/lib/ocaml-ctfp/dune-package" {"dune-package"}
+  "_build/install/default/lib/ocaml-ctfp/opam" {"opam"}
+]
+doc: [
+  "_build/install/default/doc/ocaml-ctfp/LICENSE"
+  "_build/install/default/doc/ocaml-ctfp/README.org"
+]

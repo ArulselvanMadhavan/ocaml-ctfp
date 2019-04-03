@@ -1,0 +1,10 @@
+(rule
+  (with-stdout-to dune.gen
+    (run ocaml-mdx rule --direction=to-ml chapter1.md)))
+
+(alias
+  (name runtest)
+  (deps chapter1.md)
+  (action (diff dune.inc dune.gen)))
+
+(include dune.inc)
