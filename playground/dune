@@ -1,0 +1,7 @@
+(rule
+  (targets playground.ml)
+  (deps    playground.md)
+  (action  (with-stdout-to %{targets} (run ocaml-mdx pp %{deps}))))
+
+(executable
+  (name playground))
