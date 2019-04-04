@@ -55,6 +55,7 @@ val g : int -> bool = <fun>
 # let h = BoolToInt.f
 val h : bool -> int = <fun>
 ```
+* Pseudo OCaml showing equivalence relation among functions
 ```pseudo-ocaml
 f >> (g >> h) == (f >> g) >> h == f >> g >> h
 ```
