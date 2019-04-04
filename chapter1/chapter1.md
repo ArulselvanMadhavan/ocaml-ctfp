@@ -23,13 +23,13 @@ end
 module IntToBool : (Polymorphic_Function with type a = int and type b = bool) = struct
   type a = int
   type b = bool
-  let f a = a > 1
+  let f a = a > 0
 end
 
 module BoolToInt : (Polymorphic_Function with type a = bool and type b = int) = struct
   type a = bool
   type b = int
-  let f a = match a with
+  let f = function
     | false -> 0
     | true -> 1
 end
