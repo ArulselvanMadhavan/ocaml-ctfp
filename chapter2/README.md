@@ -21,4 +21,24 @@ end
 ```
 * Bottom is also a member of bool -> bool
 ```ocaml
+module Chapter2_Bottom : sig
+  val f : bool -> bool
+end = struct
+  let f = fun _ -> failwith "Not implemented"
+end
+```
+* Functions that return bottom are called /Partial/
+* /Hask/ can be treated as /Set/
+* Factorial Function in OCaml
+```ocaml
+# open Core
+# let fact n =
+  List.fold (List.range 1 n) ~init:1 ~f:( * )
+val fact : int -> int = <fun>
+```
+* Absurd in OCaml
+```ocaml
+module type Chapter2_Absurd = sig
+  val absurd : unit -> 'a
+end
 ```

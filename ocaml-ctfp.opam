@@ -10,6 +10,7 @@ depends: [
   "ocaml" {>= "4.07.1"}
   "dune" {build}
   "patdiff"                     #For running diff based checks in tests
+  "core"
 ]
 build: [
  # ["dune" "subst"] {pinned}
