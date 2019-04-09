@@ -38,23 +38,31 @@ val fact : int -> int = <fun>
 ```
 * Absurd in OCaml
 ```ocaml
+type void
+```
+```ocaml
 # let rec absurd (x:void) = absurd x;;
+val absurd : void -> 'a = <fun>
 ```
 * Function taking unit and returning any type
 ```ocaml
 # let f44 ():int = 44
+val f44 : unit -> int = <fun>
 ```
 * fInt
 ```ocaml
 # let fInt (x:int):unit = ()
+val fInt : int -> unit = <fun>
 ```
 * fInt Generic param
 ```ocaml
-# let fInt (_:int):() = ()
+# let fInt (_:int):unit = ()
+val fInt : int -> unit = <fun>
 ```
 * A generic/polymorphic unit function
 ```ocaml
 # let unit (type a) (_:a) = ()
+val unit : 'a -> unit = <fun>
 ```
 * Bool as ADT
 ```ocaml
