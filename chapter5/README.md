@@ -50,3 +50,33 @@ compose f g = id
 # let fst (a,_) = a
 # let snd (_, b) = b
 ```
+* Object *c* and two morphisms *p* and *q* connecting it to *a* and *b*
+```ocaml
+module type Chapter5_Product_ = sig
+  type a
+  type c
+  type b
+  val p : c -> a
+  val q : c -> b
+end
+```
+* Example with *Int* and *Bool*
+```ocaml
+module Chapter5_Product_Example: Chapter5_Product with type a = int and type b = bool and type c = int = struct
+  type a = int
+  type b = bool
+  type c = int
+  let p (x:int) = x
+  let q (_:int) = true
+end
+```
+* Example with *c* as (int, int, bool)
+```ocaml
+module Chapter5_Product_Example2: Chapter5_Product = struct
+  type a = int
+  type b = bool
+  type c = int * int * bool
+  let p (x,_,_) = x
+  let q (_,_,b) = b
+end
+```
