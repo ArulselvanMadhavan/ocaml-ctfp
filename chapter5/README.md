@@ -133,3 +133,18 @@ module FactorizerImpl(Product:Chapter5_Product) = struct
   let factorizer ca cb = (Product.p ca, Product.q cb)
 end
 ```
+* CoProduct
+```ocaml
+module type CoProduct = sig
+  type a
+  type b
+  type c
+  val i : a -> c
+  val j : b -> c
+end
+```
+* Pseudo Ocaml showing function equivalence
+```
+i' == compose m i
+j' == compose m j
+```
