@@ -52,7 +52,7 @@ compose f g = id
 ```
 * Object *c* and two morphisms *p* and *q* connecting it to *a* and *b*
 ```ocaml
-module type Chapter5_Product_ = sig
+module type Chapter5_Product = sig
   type a
   type c
   type b
@@ -78,5 +78,48 @@ module Chapter5_Product_Example2: Chapter5_Product = struct
   type c = int * int * bool
   let p (x,_,_) = x
   let q (_,_,b) = b
+end
+```
+* P' and Q' from *p* and *q* using *m*
+```ocaml
+# let m (x:int) = x
+# let p' = compose Chapter5_Product_Example.p m
+# let q' = compose Chapter5_Product_Example.q m
+```
+* m as a function returning pair (int, bool)
+```ocaml
+# let m (x:int) = (x, true)
+# let p x = fst (m x)
+# let q x = snd (m x)
+```
+* With, m as a function taking (int, int, bool)
+```ocaml
+# let m ((x,_,b):int*int*bool) = (x, b)
+```
+* Pseudo OCaml showing function equivalence
+```
+fst = compose p m'
+snd = compose q m'
+```
+* m' example
+```ocaml
+# let m' ((x, b): int * bool) = (x, x, b)
+```
+* m' another example
+```ocaml
+# let m' ((x, b): int * bool) = (x, 42, b)
+```
+* Projection example
+```ocaml
+module type Chapter5_product_projection_example = functor (Product : Chapter5_Product) ->
+sig
+  val m : Product.c -> Product.a * Product.b
+end
+```
+* factorizer example
+```ocaml
+module type Factorizer = functor (Product: Chapter5_Product) ->
+sig
+  val factorizer : (Product.c -> Product.a) -> (Product.c -> Product.b) -> (Product.c -> Product.a * Product.b)
 end
 ```
