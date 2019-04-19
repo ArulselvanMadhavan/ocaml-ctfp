@@ -148,3 +148,41 @@ end
 i' == compose m i
 j' == compose m j
 ```
+* Coproduct is the disjoint union of two sets.
+* example
+```ocaml
+type contact = 
+  | PhoneNum of int
+  | EmailAddr of string
+```
+* example function
+```ocaml
+# let helpdesk = PhoneNum 2222222
+```
+* Either type
+```ocaml
+type ('a, 'b) either =
+  | Left of 'a
+  | Right of 'b
+```
+* Factorizer
+```ocaml
+let factorizer i j = function
+  | Left a -> i a
+  | Right b -> j b
+```
+* Definition of terminal object can be obtained by reversing the arrows of an initial object.
+* Definition of coproduct can be obtained by reversing the arrows of product
+* Pseudo OCaml
+```OCaml
+p = compose fst m
+q = compose snd m
+```
+```OCaml
+p () = fst (m ())
+q () = snd (m ())
+```
+* Functions are asymmetric. Should be defined for every element of its domain but doesn't have to cover the whole codomain.
+* Functions that tightly fill their codomain are called *surjective* or *onto*.
+* Functions are allowed to map many elements from the domain to a single element in the codomain. Collapsing functions are called *injective* or *one-to-one*
+* Functions that are neither embedding nor collapsing called *bijections*. They are symmetric and invertible. Example: Isomorphic functions.
