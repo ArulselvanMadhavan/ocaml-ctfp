@@ -1,7 +1,7 @@
 # Kleisli Categories
 ### Writer in Haskell
 ```ocaml
-# type 'a writer = 'a * string
+type 'a writer = 'a * string
 ```
 * Kleisli for Writer
 ```ocaml
@@ -16,14 +16,17 @@ module type Kleisli =
 * Pure for Writer
 ```ocaml
 # let pure (type a) (x:a) = (x, "");;
+val pure : 'a -> 'a * string = <fun>
 ```
 * upCase for Writer
 ```ocaml
 # let up_case:(string -> string writer) = fun s -> (String.uppercase s, "up_case ")
+val up_case : string -> string writer = <fun>
 ```
 * toWords for Writer
 ```ocaml
 # let to_words:(string -> string list writer) = fun s -> (String.split s ~on:' ', "to_words ")
+val to_words : string -> string list writer = <fun>
 ```
 * Example Kleisli application
 ```ocaml

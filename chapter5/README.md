@@ -7,21 +7,26 @@
 * Absurd definition
 ```ocaml
 # type void
+type void
 ```
 ```ocaml
 # let rec absurd (x:void) = absurd x
+val absurd : void -> 'a = <fun>
 ```
 * Terminal Object
   - One and only morphism coming to it from any object in the category.
   - Unique upto isomorphism.
 ```ocaml
 # let unit x = ()
+val unit : 'a -> unit = <fun>
 ```
 ```ocaml
 # let yes _ = true
+val yes : 'a -> bool = <fun>
 ```
 ```ocaml
 # let no _ = false
+val no : 'a -> bool = <fun>
 ```
 * For any Category C, we can reverse the arrows and define opposite category.
 * Constructions in the opposite category are prefixed with "co".
@@ -31,10 +36,12 @@
 * Isomorphism - Object that look the same and have an one to one mapping between them(Invertible morphism)
 ```ocaml
 # let compose f g x = f (g x)
+val compose : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
 # let id x = x
+val id : 'a -> 'a = <fun>
 ```
 * Pseudo Ocaml for expression function equality
-```ocaml
+```OCaml
 compose f g = id
 ```
 * Initial and Terminal objects are *unique upto unique isomorphism*.
@@ -42,13 +49,17 @@ compose f g = id
 ## Products
 ```ocaml
 # let fst (a,b) = a
+val fst : 'a * 'b -> 'a = <fun>
 ```
 ```ocaml
 # let snd (a, b) = b
+val snd : 'a * 'b -> 'b = <fun>
 ```
 ```ocaml
 # let fst (a,_) = a
+val fst : 'a * 'b -> 'a = <fun>
 # let snd (_, b) = b
+val snd : 'a * 'b -> 'b = <fun>
 ```
 * Object *c* and two morphisms *p* and *q* connecting it to *a* and *b*
 ```ocaml
@@ -83,18 +94,25 @@ end
 * P' and Q' from *p* and *q* using *m*
 ```ocaml
 # let m (x:int) = x
+val m : int -> int = <fun>
 # let p' = compose Chapter5_Product_Example.p m
+val p' : int -> int = <fun>
 # let q' = compose Chapter5_Product_Example.q m
+val q' : int -> bool = <fun>
 ```
 * m as a function returning pair (int, bool)
 ```ocaml
 # let m (x:int) = (x, true)
+val m : int -> int * bool = <fun>
 # let p x = fst (m x)
+val p : int -> int = <fun>
 # let q x = snd (m x)
+val q : int -> bool = <fun>
 ```
 * With, m as a function taking (int, int, bool)
 ```ocaml
 # let m ((x,_,b):int*int*bool) = (x, b)
+val m : int * int * bool -> int * bool = <fun>
 ```
 * Pseudo OCaml showing function equivalence
 ```
@@ -104,10 +122,12 @@ snd = compose q m'
 * m' example
 ```ocaml
 # let m' ((x, b): int * bool) = (x, x, b)
+val m' : int * bool -> int * int * bool = <fun>
 ```
 * m' another example
 ```ocaml
 # let m' ((x, b): int * bool) = (x, 42, b)
+val m' : int * bool -> int * int * bool = <fun>
 ```
 * Projection example
 ```ocaml
@@ -158,6 +178,7 @@ type contact =
 * example function
 ```ocaml
 # let helpdesk = PhoneNum 2222222
+val helpdesk : contact = PhoneNum 2222222
 ```
 * Either type
 ```ocaml
