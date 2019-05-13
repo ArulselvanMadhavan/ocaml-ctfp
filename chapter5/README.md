@@ -77,8 +77,8 @@ module Chapter5_Product_Example: Chapter5_Product with type a = int and type b =
   type a = int
   type b = bool
   type c = int
-  let p (x:int) = x
-  let q (_:int) = true
+  let p x = x
+  let q _ = true
 end
 ```
 * Example with *c* as (int, int, bool)
@@ -111,7 +111,7 @@ val q : int -> bool = <fun>
 ```
 * With, m as a function taking (int, int, bool)
 ```ocaml
-# let m ((x,_,b):int*int*bool) = (x, b)
+# let m ((x,_,b): int * int * bool) = (x, b)
 val m : int * int * bool -> int * bool = <fun>
 ```
 * Pseudo OCaml showing function equivalence
