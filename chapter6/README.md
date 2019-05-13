@@ -58,3 +58,40 @@ val stmt : string * bool = ("This statement is", false)
 ```ocaml
 type stmt = Stmt of string * int
 ```
+## Records
+* Problem in working with unnamed tuples
+```ocaml
+# let starts_with_symbol = function | (name, symbol, _) -> String.is_prefix name ~prefix:symbol
+val starts_with_symbol : string * string * 'a -> bool = <fun>
+```
+* Element as a Record
+```ocaml
+type element = 
+  { name: string;
+    symbol: string;
+    atomic_number: int;
+  }
+```
+* The two representations are isomorphic.
+```ocaml
+# let tuple_to_elem = function | (n, s, a) -> {name = n; symbol=s; atomic_number=a;}
+val tuple_to_elem : string * string * int -> element = <fun>
+```
+```ocaml
+# let elem_to_tuple = function | {name; symbol; atomic_number} -> (name, symbol, atomic_number)
+val elem_to_tuple : element -> string * string * int = <fun>
+```
+```ocaml
+# let atomic_number = function | {atomic_number} -> atomic_number
+val atomic_number : element -> int = <fun>
+```
+* Using record syntax
+```ocaml
+# let starts_with_symbol = function | {name;symbol;_;} -> String.is_prefix name ~prefix:symbol
+val starts_with_symbol : element -> bool = <fun>
+```
+* OCaml only allows special characters in the infix operator.
+```ocaml
+# let starts_with_symbol = function | {name;symbol;_;} -> String.is_prefix name ~prefix:symbol
+val starts_with_symbol : element -> bool = <fun>
+```
