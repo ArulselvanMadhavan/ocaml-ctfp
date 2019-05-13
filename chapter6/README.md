@@ -91,7 +91,3 @@ val atomic_number : element -> int = <fun>
 val starts_with_symbol : element -> bool = <fun>
 ```
 * OCaml only allows special characters in the infix operator.
-```ocaml
-# let starts_with_symbol = function | {name;symbol;_;} -> String.is_prefix name ~prefix:symbol
-val starts_with_symbol : element -> bool = <fun>
-```
