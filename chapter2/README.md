@@ -13,17 +13,15 @@ end
 ```
 * OCaml doesn't have null. Throw exceptions to introduce runtime errors
 ```ocaml
-module Chapter2_Bottom : sig
-  val f : bool -> bool
-end = struct
+module Chapter2_Bottom : Chapter2_DeclareFunction =
+struct
   let f b = failwith "Not Implemented"
 end
 ```
 * Bottom is also a member of bool -> bool
 ```ocaml
-module Chapter2_Bottom : sig
-  val f : bool -> bool
-end = struct
+module Chapter2_Bottom : Chapter2_DeclareFunction =
+struct
   let f = fun _ -> failwith "Not implemented"
 end
 ```
@@ -46,22 +44,22 @@ val absurd : void -> 'a = <fun>
 ```
 * Function taking unit and returning any type
 ```ocaml
-# let f44 ():int = 44
+# let f44 () : int = 44
 val f44 : unit -> int = <fun>
 ```
 * fInt
 ```ocaml
-# let fInt (x:int):unit = ()
+# let fInt (x:int) = ()
 val fInt : int -> unit = <fun>
 ```
 * fInt Generic param
 ```ocaml
-# let fInt (_:int):unit = ()
+# let fInt (_:int) = ()
 val fInt : int -> unit = <fun>
 ```
 * A generic/polymorphic unit function
 ```ocaml
-# let unit (type a) (_:a) = ()
+# let unit _ = ()
 val unit : 'a -> unit = <fun>
 ```
 * Bool as ADT
