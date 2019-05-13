@@ -47,15 +47,15 @@ val absurd : void -> 'a = <fun>
 # let f44 () : int = 44
 val f44 : unit -> int = <fun>
 ```
-* fInt
+* f\_int
 ```ocaml
-# let fInt (x:int) = ()
-val fInt : int -> unit = <fun>
+# let f_int (x:int) = ()
+val f_int : int -> unit = <fun>
 ```
-* fInt Generic param
+* f\_int Generic param
 ```ocaml
-# let fInt (_:int) = ()
-val fInt : int -> unit = <fun>
+# let f_int (_:int) = ()
+val f_int : int -> unit = <fun>
 ```
 * A generic/polymorphic unit function
 ```ocaml
