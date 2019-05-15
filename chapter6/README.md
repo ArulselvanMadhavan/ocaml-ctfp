@@ -90,4 +90,56 @@ val atomic_number : element -> int = <fun>
 # let starts_with_symbol = function | {name;symbol;_;} -> String.is_prefix name ~prefix:symbol
 val starts_with_symbol : element -> bool = <fun>
 ```
-* OCaml only allows special characters in the infix operator.
+* OCaml only allows special characters in the infix operator. So, the above function name cannot be applied be infix.
+## Sum Types
+* Either type
+```ocaml
+type ('a, 'b) either = Left of 'a | Right of 'b
+```
+* Sum Types are commutative upto isomorphism.
+```ocaml
+type ('a, 'b, 'c) one_of_three = Sinistrial of 'a | Medial of 'b | Dextral of 'c
+```
+* *Set* is a symmetric monoidal category with respect to coproduct.
+  * Role of the binary operation is played by the disjoint sum(Either).
+  * Role of the initial operation is played by the initial object(Void).
+* Pseudo OCaml  
+```OCaml
+'a void either
+```
+* Sum type example
+```ocaml
+type color = Red | Green | Blue
+```
+* Even simpler example
+```ocaml
+type bool = True | False
+```
+* Maybe type
+```ocaml
+type 'a maybe = Nothing | Just of 'a
+```
+* Nothing type
+```ocaml
+type nothing_type = Nothing
+```
+* Just type
+```ocaml
+type 'a just_type = Just of 'a
+```
+* Maybe using Either
+```ocaml
+type 'a maybe = (unit, 'a) either
+```
+* List type
+```ocaml
+type 'a list = Nil | Cons of 'a * 'a list
+```
+* Maybe Tail
+```ocaml
+type 'a maybe = Nothing | Just of 'a
+```
+```ocaml
+# let maybe_tail = function | Nil -> Nothing | Cons (_, xs) -> Just xs
+val maybe_tail : 'a list -> 'a list maybe = <fun>
+```
