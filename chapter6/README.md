@@ -143,3 +143,29 @@ type 'a maybe = Nothing | Just of 'a
 # let maybe_tail = function | Nil -> Nothing | Cons (_, xs) -> Just xs
 val maybe_tail : 'a list -> 'a list maybe = <fun>
 ```
+## Algebra of Types
+* Pseudo Ocaml representation of types
+```OCaml
+'a * ('b, 'c) either
+('a * 'b, 'c * 'd) either
+```
+* Isomorphic example
+```ocaml
+# let prod_to_sum (x, e) = match e with
+                           | Left y -> Left (x, y)
+                           | Right z -> Right (x, z)
+val prod_to_sum : 'a * ('b, 'c) either -> ('a * 'b, 'a * 'c) either = <fun>
+```
+```ocaml
+# let sum_to_prod = function | Left (x, y) -> (x, Left y) | Right (x, z) -> (x, Right z)
+val sum_to_prod : ('a * 'b, 'a * 'c) either -> 'a * ('b, 'c) either = <fun>
+```
+* Sample value
+```ocaml
+# let prod1 = (2, Left "Hi!")
+val prod1 : int * (string, 'a) either = (2, Left "Hi!")
+```
+* Defining list again
+```ocaml
+type 'a list = Nil | Cons of 'a * 'a list
+```
