@@ -112,7 +112,7 @@ end
 ```
 - Functor instance for Option 
 ```ocaml
-module Option_Functor:Functor = struct 
+module Option_Functor:(Functor with type 'a t = 'a option) = struct 
   type 'a t = 'a option 
   let fmap f = function | None -> None | Some x -> Some (f x) 
 end 
@@ -123,8 +123,8 @@ type 'a list = Nil | Cons of 'a * 'a list
 ```
 - Fmap for list 
 ```ocaml
-module type List_Functor_Type = sig  
-  type 'a t = 'a list  
+module type List_Functor_Type = sig
+  type 'a t = 'a list
   val fmap : ('a -> 'b) -> 'a list -> 'a list 
 end 
 ```
@@ -135,7 +135,7 @@ val fmap : ('a -> 'b) -> 'a list -> 'b list = <fun>
 ```
 - Functor instance for List 
 ```ocaml
-module List_Functor : Functor = struct 
+module List_Functor : (Functor with type 'a t = 'a list) = struct 
   type 'a t = 'a list 
   let rec fmap f = function | Nil -> Nil | Cons (x, xs) -> Cons (f x, fmap f xs) 
 end 
@@ -183,3 +183,80 @@ val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b = <fun>
 val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b = <fun>
 ```
 
+### Functors as Containers
+- Infinite list
+```ocaml
+# let nats = Caml.Stream.from (fun i -> Some (i + 1))
+val nats : int Stream.t = <abstr>
+```
+- Functors can be considered as a container of value(s) of the type over which it is parameterized or as containing a recipe for generating those values.
+- It doesn't matter if we are able to access the values inside the functor. All that matters is if we are able to manipulate those values using functions and making sure that these manipulations compose correctly.
+- Const
+```ocaml
+type ('c, 'a) const = Const of 'c
+```
+- Const fmap signature example
+```ocaml
+module type Const_Functor_Example = sig
+  val fmap : ('a -> 'b) -> ('c, 'a) const -> ('c, 'b) const
+end
+```
+- Const functor instance.
+```ocaml
+module Const_Functor(T : T) : Functor = struct
+  type 'a t = (T.t, 'a) const
+  let fmap f = function | Const c -> Const c
+end
+```
+### Functor Composition
+- A composition of two functors when acting on objects is just the composition of their respective object mappings.
+- Same for morphisms.
+```ocaml
+# let maybe_tail = function | [] -> None | _ :: xs -> Some xs
+val maybe_tail : 'a list -> 'a list option = <fun>
+```
+- Using fmap of respective functors
+```ocaml
+# let square x = x * x
+val square : int -> int = <fun>
+# let mis = Some (Cons (1, Cons (2, Cons (3, Nil))))
+val mis : int list option = Some (Cons (1, Cons (2, Cons (3, Nil))))
+# Option_Functor.fmap (List_Functor.fmap square) mis
+- : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
+```
+- Composing fmap of list and option functors
+```ocaml
+# Option_Functor.fmap
+- : ('a -> 'b) -> 'a option -> 'b option = <fun>
+# List_Functor.fmap
+- : ('a -> 'b) -> 'a list -> 'b list = <fun>
+# let fmapC = Option_Functor.fmap <.> List_Functor.fmap
+val fmapC :
+  ('_weak1 -> '_weak2) -> '_weak1 list option -> '_weak2 list option = <fun>
+# fmapC (square) mis
+- : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
+```
+- Viewing fmap as a function of one argument
+```ocaml
+module type Fmap_Alt_Sig_Example = sig
+  type 'a t
+  val fmap : ('a -> 'b) -> ('a t -> 'b t)
+end
+```
+- square signature
+```ocaml
+module type Square_Signature = sig
+  val square : int -> int
+end
+```
+- Return type signature (Syntactically correct Ocaml but not compiled)
+```OCaml
+int list -> int list
+```
+- First fmap takes above signature and then returns a function.
+```OCaml
+int list option -> int list option
+```
+- Functors form a category.
+- Objects are categories. Morphisms are functors.
+- *Cat* category of all small categories.
