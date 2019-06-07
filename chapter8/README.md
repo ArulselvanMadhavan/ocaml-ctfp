@@ -154,3 +154,100 @@ module KleisliFunctor : Functor = struct
   let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> KleisliComposition.(>=>) id (fun x -> KleisliIdentity.return (f x))
 end
 ```
+- Covariant Functors
+```ocaml
+module PartialArrow(T : sig type r end) = struct
+  type 'a t = T.r -> 'a
+end
+```
+- Reader type
+```ocaml
+type ('a, 'r) reader = 'r -> 'a
+```
+- Functor for Reader type
+```ocaml
+module ReaderFunctor(In: sig type r end): Functor = struct
+  type 'a t = (In.r, 'a) reader
+  let (<.>) f g x = f (g x)
+  let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f g -> f <.> g
+end
+```
+- Reader flipped - Op
+```ocaml
+type ('r, 'a) op = 'a -> 'r
+```
+- Fmap for Op
+```OCaml
+val fmap : 'a 'b. ('a -> 'b) -> ('a -> 'r) -> ('b -> 'r)
+```
+- For every category C, there is a dual category C^op(Same objects as C but arrows reversed)
+- Mapping of categories that inverts the direction of morphisms is called contravariant functor.
+- Contravariant functor is a regular functor from the opposite category.
+```ocaml
+module type Contravariant = sig
+  type 'a t
+  val contramap : 'a 'b. ('b -> 'a) -> 'a t -> 'b t
+end
+```
+- Contravariant instance for op
+```ocaml
+module OpContravariant(In : sig type r end) : Contravariant = struct
+  type 'a t = (In.r, 'a) op
+  let (<.>) f g x = f (g x)
+  let contramap : 'a 'b. ('b -> 'a) -> 'a t -> 'b t = fun f g -> g <.> f
+end
+```
+- Flip
+```ocaml
+# let flip : 'a 'b 'c. ('a -> 'b -> 'c) -> ('b -> 'a -> 'c) = fun f -> fun b a -> f a b
+```
+- Contramap and flip
+```ocaml
+# let contramap : 'a 'b 'c. ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip (<.>) f g
+```
+### Profunctors
+- Function arrow is contravariant in its first argument and covariant in its second argument.
+- If the target category is *Set*, then we can describe this as Profunctor.
+```ocaml
+(* Profunctor definition *)
+module type Profunctor = sig
+  type ('a,'b) p
+  val dimap : ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p
+end
+
+(* Profunctor alternate definition *)
+module type ProfunctorExt = sig
+  type ('a, 'b) p
+  val lmap : ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p
+  val rmap : ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p
+end
+
+(* Profunctor dimap defined using lmap and rmap *)
+module Profunctor_Using_Ext(PF: ProfunctorExt):Profunctor = struct
+  type ('a, 'b) p = ('a, 'b) PF.p
+  let (<.>) f g x = f (g x)
+  let dimap : 'a 'b 'c 'd. ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p = fun f g -> (PF.lmap f <.> PF.rmap g)
+end
+
+(** Profunctor lmap and rmap defined using dimap *)
+module ProfunctorExt_Using_Dimap(PF: Profunctor): ProfunctorExt = struct
+  type ('a, 'b) p = ('a, 'b) PF.p
+  let lmap : 'a 'b 'c. ('a -> 'b) -> ('b, 'c) PF.p -> ('a, 'c) PF.p = fun f -> PF.dimap f id
+  let rmap : 'a 'b 'c. ('b -> 'c) -> ('a, 'b) PF.p -> ('a, 'c) PF.p = fun g -> PF.dimap id g
+end;;
+```
+- Profunctor Implementation for function type
+```ocaml
+module ProfunctorArrow : Profunctor = struct
+  type ('a, 'b) p = 'a -> 'b
+  let dimap : 'a 'b 'c 'd. ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p = fun f g p -> g <.> p <.> f
+end
+module ProfunctorExtArrow : ProfunctorExt = struct
+  type ('a, 'b) p = 'a -> 'b
+  let lmap : 'a 'b 'c. ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p = fun f p -> (flip (<.>)) f p
+  let rmap : 'a 'b 'c. ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p = (<.>)
+end
+```
+- Profunctor : C^op x D -> Set
+- Hom-Functor: C^op x C -> Hom-Set (a, b)
+- Hom-Functor is a special case of Profunctor.
