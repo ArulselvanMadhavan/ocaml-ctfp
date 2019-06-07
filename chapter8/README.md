@@ -1,4 +1,18 @@
 # Functoriality
+### Utitlities needed for the code below
+```ocaml
+# let id : 'a -> 'a = fun x -> x
+val id : 'a -> 'a = <fun>
+# let (<.>) f g x = f (g x)
+val ( <.> ) : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
+```
+```ocaml
+(* Functor definition given in previous chapter *)
+module type Functor = sig 
+  type 'a t 
+  val fmap : ('a -> 'b) -> 'a t -> 'b t 
+end
+```
 ### Bifunctors
 - Functors are morphisms in Cat.
 - Bifunctors - Functors of two arguments.
@@ -13,7 +27,7 @@ module type BifunctorCore = sig
   val bimap : ('a -> 'c) -> ('b -> 'd) -> ('a, 'b) t -> ('c, 'd) t
 end
 
-Module type BifunctorExt = sig
+module type BifunctorExt = sig
   type ('a, 'b) t
   val first : ('a -> 'c) -> ('a, 'b) t -> ('c, 'b) t
   val second : ('b -> 'd) -> ('a, 'b) t -> ('a, 'd) t
@@ -26,7 +40,6 @@ end
 
 module BifunctorExt_Using_Core(M : BifunctorCore):BifunctorExt = struct
   type ('a, 'b) t = ('a, 'b) M.t
-  external id : 'a -> 'a = "%identity"
   let first g x = M.bimap g id x
   let second h x = M.bimap id h x
 end
@@ -162,13 +175,12 @@ end
 ```
 - Reader type
 ```ocaml
-type ('a, 'r) reader = 'r -> 'a
+type ('r, 'a) reader = 'r -> 'a
 ```
 - Functor for Reader type
 ```ocaml
 module ReaderFunctor(In: sig type r end): Functor = struct
   type 'a t = (In.r, 'a) reader
-  let (<.>) f g x = f (g x)
   let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f g -> f <.> g
 end
 ```
@@ -186,24 +198,25 @@ val fmap : 'a 'b. ('a -> 'b) -> ('a -> 'r) -> ('b -> 'r)
 ```ocaml
 module type Contravariant = sig
   type 'a t
-  val contramap : 'a 'b. ('b -> 'a) -> 'a t -> 'b t
+  val contramap : ('b -> 'a) -> 'a t -> 'b t
 end
 ```
 - Contravariant instance for op
 ```ocaml
 module OpContravariant(In : sig type r end) : Contravariant = struct
   type 'a t = (In.r, 'a) op
-  let (<.>) f g x = f (g x)
   let contramap : 'a 'b. ('b -> 'a) -> 'a t -> 'b t = fun f g -> g <.> f
 end
 ```
 - Flip
 ```ocaml
 # let flip : 'a 'b 'c. ('a -> 'b -> 'c) -> ('b -> 'a -> 'c) = fun f -> fun b a -> f a b
+val flip : ('a -> 'b -> 'c) -> 'b -> 'a -> 'c = <fun>
 ```
 - Contramap and flip
 ```ocaml
 # let contramap : 'a 'b 'c. ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip (<.>) f g
+val contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = <fun>
 ```
 ### Profunctors
 - Function arrow is contravariant in its first argument and covariant in its second argument.
@@ -225,7 +238,6 @@ end
 (* Profunctor dimap defined using lmap and rmap *)
 module Profunctor_Using_Ext(PF: ProfunctorExt):Profunctor = struct
   type ('a, 'b) p = ('a, 'b) PF.p
-  let (<.>) f g x = f (g x)
   let dimap : 'a 'b 'c 'd. ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p = fun f g -> (PF.lmap f <.> PF.rmap g)
 end
 
