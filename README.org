@@ -1,1 +1,9 @@
 * OCaml version of Category Theory For Programmers
+
+Resources I found useful as I started translating the book in OCaml:
+1. https://github.com/freebroccolo/ocaml-cats
+2. https://github.com/ocamllabs/higher
+
+Thanks to @mseri for offering to do code review.
+
+If you find any mistakes or want to improve code snippets, please submit a PR.
