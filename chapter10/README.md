@@ -144,3 +144,7 @@ contramap f <.> pred_to_str = pred_to_str <.> contramap f
 ('a -> 'a) -> 'a f
 ```
 - Dinatural transformation is a generalization of the natural transformations.
+### Functor Category
+- There is one category of functors for each pair of categories, C and D.
+- Objects in this category are functors from C to D.
+- Morphisms = Natural transformations between C and D.
