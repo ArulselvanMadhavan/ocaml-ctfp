@@ -33,6 +33,7 @@ val alpha : 'a f -> 'a g
 - Free theorems are the naturality conditions, in the case of natural transformations expressed using parametric polymorphism.
 ```ocaml
 # let safe_head = function | [] -> None | x :: xs -> Some x
+val safe_head : 'a list -> 'a option = <fun>
 ```
 - Verifying the Naturality condition(Pseudo OCaml, since function equality cannot be expressed)
 ```OCaml
@@ -56,20 +57,23 @@ let safe_head (fmap f (x :: xs)) = safe_head (f x :: f xs) = Some (f x)
 - Implemenation of fmap for lists
 ```ocaml
 # let rec fmap f = function | [] -> [] | (x :: xs) -> f x :: fmap f xs
+val fmap : ('a -> 'b) -> 'a list -> 'b list = <fun>
 ```
 - Implementation of fmap for option type
 ```ocaml
 # let rec fmap f = function 
     | None -> None 
-    | Some -> Some (f x)
+    | Some x -> Some (f x)
+val fmap : ('a -> 'b) -> 'a option -> 'b option = <fun>
 ```
 - Natural transformation to or from the *Const* functor looks just like a function that's polymorphic in either the return type or argument type.
 ```ocaml
 # let rec length : 'a list -> (int, 'a) const = function 
     | [] -> Const 0 
-    | (_ :: xs) -> Const (1 + un_const (length xs)) and 
-un_const : 'a 'c. ('c, 'a) const -> 'c = function 
-    | Const x -> x
+    | (_ :: xs) -> Const (1 + un_const (length xs))
+    and un_const : 'c 'a. ('c, 'a) const -> 'c = function | Const c -> c
+val length : 'a list -> (int, 'a) const = <fun>
+val un_const : ('c, 'a) const -> 'c = <fun>
 ```
 - In practice, length is defined as
 ```OCaml
@@ -79,6 +83,7 @@ val length : 'a list -> int
 ```ocaml
 # let scam : 'a. ('int, 'a) const -> 'a option = function 
     | Const a -> None
+val scam : ('int, 'a) const -> 'a option = <fun>
 ```
 - Reader type
 ```ocaml
@@ -100,11 +105,13 @@ val alpha : (unit, 'a) reader -> 'a option
 ```ocaml
 # let dumb : 'a. (unit, 'a) reader -> 'a option = function
     | Reader _ -> None
+val dumb : (unit, 'a) reader -> 'a option = <fun>
 ```
 - obvious implementation
 ```ocaml
 # let obvious : 'a. (unit, 'a) reader -> 'a option = function
     | Reader f -> Some (f ())
+val obvious : (unit, 'a) reader -> 'a option = <fun>
 ```
 ### Beyond Naturality
 - Parametrically polymorphic function between two functors is always a natural transformation.
@@ -112,7 +119,7 @@ val alpha : (unit, 'a) reader -> 'a option
 - Function types are contravariant in their argument type.
 - Contravariant example
 ```ocaml
-type ('r, 'a) op = Op ('a -> 'r)
+type ('r, 'a) op = Op of ('a -> 'r)
 ```
 - Contravariant instance
 ```ocaml
@@ -126,6 +133,7 @@ end
 ```ocaml
 # let pred_to_str = function
     | Op f -> Op (fun x -> if f x then "T" else "F")
+val pred_to_str : (bool, 'a) op -> (string, 'a) op = <fun>
 ```
 - Contravariant functors satisfy the opposite naturality condition.
 ```OCaml
@@ -134,7 +142,9 @@ contramap f <.> pred_to_str = pred_to_str <.> contramap f
 - Op Bool contramap signature
 ```ocaml
 # module Op_Bool = Op_Contravariant(struct type r = bool end)
+module Op_Bool : Contravariant
 # Op_Bool.contramap
+- : ('b -> 'a) -> 'a Op_Bool.t -> 'b Op_Bool.t = <fun>
 ```
 - Type constructors that are neither covariant or contravariant.
 ```OCaml
