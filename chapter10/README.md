@@ -148,3 +148,14 @@ contramap f <.> pred_to_str = pred_to_str <.> contramap f
 - There is one category of functors for each pair of categories, C and D.
 - Objects in this category are functors from C to D.
 - Morphisms = Natural transformations between C and D.
+- Composition of natural transformations is associative.
+- Functor category between C and D is Fun(C, D) or |C, D| or D^C
+### Revisiting abstractions
+- Category
+  - objects and morphisms
+- Cat - Higher order category that contains other categories as objects.
+- Morphisms in Cat are functors.
+- Hom-Set in Cat is a set of functors. Cat(C,D) - Set of functors between C and D categories.
+- Functor Category |C,D| is *also* a set of functors between C and D.
+- Functor Category is also a category. So it must be part of Cat.
+- Cat is a full blown Cartesian Closed Category in which there is an exponential object D^C for any pair of categories. This exponential object is a category - Functor Category Fun(C, D)
