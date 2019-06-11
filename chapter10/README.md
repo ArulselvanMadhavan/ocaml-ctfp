@@ -159,3 +159,12 @@ contramap f <.> pred_to_str = pred_to_str <.> contramap f
 - Functor Category |C,D| is *also* a set of functors between C and D.
 - Functor Category is also a category. So it must be part of Cat.
 - Cat is a full blown Cartesian Closed Category in which there is an exponential object D^C for any pair of categories. This exponential object is a category - Functor Category Fun(C, D)
+### 2-Categories
+- Cat - Higher order category with categories as objects and functors as morphisms.
+- Hom-Set in Cat is a set of functors.
+- Set of functors form a category.
+- Functors are morphisms in Cat. Natural transformations are morphisms between morphisms.
+- 2-category contains
+  - objects - Categories
+  - 1 morphisms - Functors between categories
+  - 2 morphisms between morphisms - Natural transformation between functors.
