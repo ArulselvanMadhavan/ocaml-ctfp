@@ -7,6 +7,10 @@ module type Functor = sig
   val fmap : ('a -> 'b) -> 'a t -> 'b t 
 end
 let (<.>) f g x = f (g x)
+module type Contravariant = sig
+  type 'a t
+  val contramap : ('b -> 'a) -> 'a t -> 'b t
+end
 ```
 - Functor is a mapping between categories that preserve their structure.
 - Embeds source category in target category by using the source as the blueprint.
@@ -85,7 +89,7 @@ type ('e, 'a) reader = Reader of ('e -> 'a)
 module Reader_Functor(T : sig type e end) : Functor = struct
   type 'a t = (T.e, 'a) reader
   let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> function
-    | Reader r -> Reader (fun e -> f (r e))
+    | Reader r -> Reader (f <.> r)
 end
 ```
 - Natural Transformation from Reader () a -> Maybe a
@@ -102,4 +106,41 @@ val alpha : (unit, 'a) reader -> 'a option
 # let obvious : 'a. (unit, 'a) reader -> 'a option = function
     | Reader f -> Some (f ())
 ```
-
+### Beyond Naturality
+- Parametrically polymorphic function between two functors is always a natural transformation.
+- Function types are covariant in their return type.
+- Function types are contravariant in their argument type.
+- Contravariant example
+```ocaml
+type ('r, 'a) op = Op ('a -> 'r)
+```
+- Contravariant instance
+```ocaml
+module Op_Contravariant(T : sig type r end): Contravariant = struct
+  type 'a t = (T.r, 'a) op
+  let contramap : ('b -> 'a) -> 'a t -> 'b t = fun f -> function
+    | Op g -> Op (g <.> f)
+end
+```
+- predToStr
+```ocaml
+# let pred_to_str = function
+    | Op f -> Op (fun x -> if f x then "T" else "F")
+```
+- Contravariant functors satisfy the opposite naturality condition.
+```OCaml
+contramap f <.> pred_to_str = pred_to_str <.> contramap f
+```
+- Op Bool contramap signature
+```ocaml
+# module Op_Bool = Op_Contravariant(struct type r = bool end)
+# Op_Bool.contramap
+```
+- Type constructors that are neither covariant or contravariant.
+```OCaml
+'a -> 'a
+```
+```OCaml
+('a -> 'a) -> 'a f
+```
+- Dinatural transformation is a generalization of the natural transformations.
