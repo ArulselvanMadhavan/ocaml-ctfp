@@ -92,7 +92,7 @@ val starts_with_symbol : element -> bool = <fun>
 ```
 * OCaml only allows special characters in the infix operator. So, the above function name cannot be applied be infix.
 ## Sum Types
-* Either type
+* Either type (Similar to OCaml's builtin Result type)
 ```ocaml
 type ('a, 'b) either = Left of 'a | Right of 'b
 ```
@@ -115,7 +115,7 @@ type color = Red | Green | Blue
 ```ocaml
 type bool = True | False
 ```
-* Maybe type
+* Maybe type (Similar to OCaml's builtin Option type)
 ```ocaml
 type 'a maybe = Nothing | Just of 'a
 ```
