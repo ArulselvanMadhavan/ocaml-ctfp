@@ -7,3 +7,5 @@ Resources I found useful as I started translating the book in OCaml:
 Thanks to @mseri for offering to do code review.
 
 If you find any mistakes or want to improve code snippets, please submit a PR.
+
+*** Currently working on auto inserting the snippets from this repo to the book.

@@ -1,63 +1,50 @@
-# Chapter 1 Code Snippets
+# Chapter 1 - The essence of composition
+### Utilities (Feel free to skip. Used to compile code below)
+```ocaml
+# let (>>) : 'a 'b 'c. ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c = 
+    fun g f x -> g (f x)
+# let f : string -> int = String.length
+```
+### Code snippets
 * A generic function from type a to type b.
 ```ocaml
-module type Polymorphic_Function = sig
+module type Polymorphic_Function_F = sig
   type a
   type b
   val f : a -> b
 end
 ```
+* Another polymorphic function from type b to type c.
+```ocaml
+module type Polymorphic_Function_G = sig
+  type b
+  type c
+  val g : b -> c
+end
+```
 * Compose Function definition is not part of the standard library. We can define a custom /compose/ function.
 ```ocaml
-# let (>>) f g x = g (f x)
-val ( >> ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c = <fun>
-```
-* Compose is a polymorphic function. So, you can call it with any two function as long as the output of one matches the input of the other.
-```ocaml
-module StringToInt : (Polymorphic_Function with type a = string and type b = int) = struct
-  type a = string
-  type b = int
-  let f = String.length
-end
-
-module IntToBool : (Polymorphic_Function with type a = int and type b = bool) = struct
-  type a = int
-  type b = bool
-  let f a = a > 0
-end
-
-module BoolToInt : (Polymorphic_Function with type a = bool and type b = int) = struct
-  type a = bool
-  type b = int
-  let f = function
-    | false -> 0
-    | true -> 1
+module Compose_Example = functor(F: Polymorphic_Function_F)(G: Polymorphic_Function_G with type b = F.b) -> struct
+   let (>>) : 'a 'b 'c. ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c = 
+     fun g f x -> g (f x)
+   let compose : 'a -> 'c = G.g >> F.f
 end
 ```
-```ocaml
-# let f = StringToInt.f
-val f : string -> int = <fun>
-# let g = IntToBool.f
-val g : int -> bool = <fun>
-```
-* Now Call Compose
-```ocaml
-# f >> g
-- : string -> bool = <fun>
-```
+* Compose Three functions
+```OCaml
+module Compose_Three_GF = functor(F:Polymorphic_Function_F)(G:Polymorphic_Function_G with type b = F.b)(H:Polymorphic_Function_H with type c = G.c) -> struct
+  let (>>) : 'a 'b 'c. ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c = 
+    fun g f x -> g (f x)
+  let compose : 'a -> 'd = H.h >> (G.g >> F.f)
+end
 
-* Properties of Composition
-```ocaml
-# let f = StringToInt.f
-val f : string -> int = <fun>
-# let g = IntToBool.f
-val g : int -> bool = <fun>
-# let h = BoolToInt.f
-val h : bool -> int = <fun>
-```
-* Pseudo OCaml showing equivalence relation among functions
-```pseudo-ocaml
-f >> (g >> h) == (f >> g) >> h == f >> g >> h
+module Compose_Three_HG = functor(F:Polymorphic_Function_F)(G:Polymorphic_Function_G with type b = F.b)(H:Polymorphic_Function_H with type c = G.c) -> struct
+  let (>>) : 'a 'b 'c. ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c = 
+    fun g f x -> g (f x)
+  let compose : 'a -> 'd = (H.h >> G.g) >> F.f
+end
+
+Compose_Three_GF.compose = Compose_Three_HG.compose
 ```
 * Identity Function
 ```ocaml
@@ -65,9 +52,7 @@ f >> (g >> h) == (f >> g) >> h == f >> g >> h
 val id : 'a -> 'a = <fun>
 ```
 * Compose and Identity
-```ocaml
-# f >> id
-- : string -> int = <fun>
-# id >> f
-- : string -> int = <fun>
+```OCaml
+f >> id
+id >> f
 ```
