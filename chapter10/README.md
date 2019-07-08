@@ -22,12 +22,12 @@ end
   - Mappings of functors.
 - Natural isomorphism is defined as a natural transformation whose components are all isomorphisms.
 ### Polymorphic Functions
-- Endofunctors - Type constructors that map types to types. Source and target category are the same.
-```OCaml
+- Endofunctors - Type constructors that map types to types. Source and target category are the same. (pseudo OCaml)
+```ocaml
 val alpha : 'a . 'a f -> 'a g
 ```
-- Without universal quantification.
-```OCaml
+- Without universal quantification. (pseudo OCaml since value declarations are only allowed in signatures)
+```ocaml
 val alpha : 'a f -> 'a g
 ```
 - Free theorems are the naturality conditions, in the case of natural transformations expressed using parametric polymorphism.
@@ -35,8 +35,8 @@ val alpha : 'a f -> 'a g
 # let safe_head = function | [] -> None | x :: xs -> Some x
 val safe_head : 'a list -> 'a option = <fun>
 ```
-- Verifying the Naturality condition(Pseudo OCaml, since function equality cannot be expressed)
-```OCaml
+- Verifying the Naturality condition (pseudo OCaml, since function equality cannot be expressed)
+```ocaml
 let fmap f <.> safe_head = safe_head <.> fmap f
 ```
 - Cases to handle
@@ -44,14 +44,14 @@ let fmap f <.> safe_head = safe_head <.> fmap f
 (* Starting with empty list *)
 let fmap f (safe_head []) = fmap f None = None
 ```
-```OCaml
+```ocaml
 let safe_head (fmap f []) = safe_head [] = None
 ```
 - Non empty list
-```OCaml
-let fmap f (safe_head (x :: xs)) = fmap f (Some x)= Some (f x)
+```ocaml
+let fmap f (safe_head (x :: xs)) = fmap f (Some x) = Some (f x)
 ```
-```OCaml
+```ocaml
 let safe_head (fmap f (x :: xs)) = safe_head (f x :: f xs) = Some (f x)
 ```
 - Implemenation of fmap for lists
@@ -71,7 +71,7 @@ val fmap : ('a -> 'b) -> 'a option -> 'b option = <fun>
 # let rec length : 'a list -> (int, 'a) const = function 
     | [] -> Const 0 
     | (_ :: xs) -> Const (1 + un_const (length xs))
-    and un_const : 'c 'a. ('c, 'a) const -> 'c = function | Const c -> c
+    and un_const (Const c) = c
 val length : 'a list -> (int, 'a) const = <fun>
 val un_const : ('c, 'a) const -> 'c = <fun>
 ```
@@ -81,7 +81,7 @@ val length : 'a list -> int
 ```
 - Parametrically polymorphic function from `Const` functor
 ```ocaml
-# let scam : 'a. ('int, 'a) const -> 'a option = function 
+# let scam : ('int, 'a) const -> 'a option = function 
     | Const a -> None
 val scam : ('int, 'a) const -> 'a option = <fun>
 ```
@@ -93,7 +93,7 @@ type ('e, 'a) reader = Reader of ('e -> 'a)
 ```ocaml
 module Reader_Functor(T : sig type e end) : Functor = struct
   type 'a t = (T.e, 'a) reader
-  let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> function
+  let fmap f = function
     | Reader r -> Reader (f <.> r)
 end
 ```
@@ -103,13 +103,13 @@ val alpha : (unit, 'a) reader -> 'a option
 ```
 - dumb version
 ```ocaml
-# let dumb : 'a. (unit, 'a) reader -> 'a option = function
+# let dumb : (unit, 'a) reader -> 'a option = function
     | Reader _ -> None
 val dumb : (unit, 'a) reader -> 'a option = <fun>
 ```
 - obvious implementation
 ```ocaml
-# let obvious : 'a. (unit, 'a) reader -> 'a option = function
+# let obvious : (unit, 'a) reader -> 'a option = function
     | Reader f -> Some (f ())
 val obvious : (unit, 'a) reader -> 'a option = <fun>
 ```
@@ -125,7 +125,7 @@ type ('r, 'a) op = Op of ('a -> 'r)
 ```ocaml
 module Op_Contravariant(T : sig type r end): Contravariant = struct
   type 'a t = (T.r, 'a) op
-  let contramap : ('b -> 'a) -> 'a t -> 'b t = fun f -> function
+  let contramap f = function
     | Op g -> Op (g <.> f)
 end
 ```
