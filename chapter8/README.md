@@ -48,7 +48,7 @@ end
 ```ocaml
 module Bifunctor_Product : BifunctorCore = struct
   type ('a, 'b) t = 'a * 'b
-  let bimap : 'a 'b 'c 'd. ('a -> 'c) -> ('b -> 'd) -> ('a, 'b) t -> ('c, 'd) t = fun f g x -> (f (fst x), g (snd x))
+  let bimap f g (l, r)  = (f l, g r)
 end
 ```
 - bimap signature for product type.
@@ -80,7 +80,7 @@ type 'a id = Id of 'a
 ```ocaml
 module Identity_Functor : Functor = struct
   type 'a t = 'a id
-  let fmap f = function | Id a -> Id (f a)
+  let fmap f (Id a) = Id (f a)
 end
 ```
 - Maybe type
@@ -110,7 +110,7 @@ end
 ```ocaml
 module BiCompBifunctor(BF: BifunctorCore)(FU:Functor)(GU:Functor):BifunctorCore = struct
   type ('a, 'b) t = BiComp of ('a FU.t, 'b GU.t) BF.t
-  let bimap : 'a 'b 'c 'd. ('a -> 'c) -> ('b -> 'd) -> ('a, 'b) t -> ('c, 'd) t = fun f g -> function | BiComp x -> BiComp (BF.bimap (FU.fmap f) (GU.fmap g) x)
+  let bimap f g (BiComp x) = BiComp (BF.bimap (FU.fmap f) (GU.fmap g) x)
 end
 ```
 - type of x in the definition (Pseudo OCaml)
@@ -133,9 +133,9 @@ type 'a tree = Leaf of 'a | Node of 'a tree * 'a tree
 ```
 - Functor for tree
 ```ocaml
-module TreeFunctor:Functor = struct
+module TreeFunctor: Functor = struct
   type 'a t = 'a tree
-  let rec fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> function
+  let rec fmap f = function
     | Leaf a -> Leaf (f a)
     | Node (l, r) -> Node (fmap f l, fmap f r)
 end
@@ -147,11 +147,11 @@ type 'a writer = 'a * string
 - Kleisli Composition (Using Writer)
 ```ocaml
 module KleisliComposition = struct
-  let (>=>) : 'a 'b 'c. ('a -> 'b writer) -> ('b -> 'c writer) -> ('a -> 'c writer) = fun m1 m2 ->
+  let (>=>) : ('a -> 'b writer) -> ('b -> 'c writer) -> ('a -> 'c writer) = fun m1 m2 ->
   fun x ->
     let (y, s1) = m1 x in
     let (z, s2) = m2 y in
-    (z, String.concat ~sep:"" [s1; s2])
+    (z, StringLabels.concat ~sep:"" [s1; s2])
 end
 ```
 - Kleisli Identity (Using writer)
@@ -164,7 +164,7 @@ end
 ```ocaml
 module KleisliFunctor : Functor = struct
   type 'a t = 'a writer
-  let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> KleisliComposition.(>=>) id (fun x -> KleisliIdentity.return (f x))
+  let fmap f = KleisliComposition.(>=>) id (fun x -> KleisliIdentity.return (f x))
 end
 ```
 - Covariant Functors
@@ -181,7 +181,7 @@ type ('r, 'a) reader = 'r -> 'a
 ```ocaml
 module ReaderFunctor(In: sig type r end): Functor = struct
   type 'a t = (In.r, 'a) reader
-  let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f g -> f <.> g
+  let fmap f g = f <.> g
 end
 ```
 - Reader flipped - Op
@@ -205,17 +205,17 @@ end
 ```ocaml
 module OpContravariant(In : sig type r end) : Contravariant = struct
   type 'a t = (In.r, 'a) op
-  let contramap : 'a 'b. ('b -> 'a) -> 'a t -> 'b t = fun f g -> g <.> f
+  let contramap f g = g <.> f
 end
 ```
 - Flip
 ```ocaml
-# let flip : 'a 'b 'c. ('a -> 'b -> 'c) -> ('b -> 'a -> 'c) = fun f -> fun b a -> f a b
+# let flip f b a = f a b
 val flip : ('a -> 'b -> 'c) -> 'b -> 'a -> 'c = <fun>
 ```
 - Contramap and flip
 ```ocaml
-# let contramap : 'a 'b 'c. ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip (<.>) f g
+# let contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip (<.>) f g
 val contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = <fun>
 ```
 ### Profunctors
@@ -238,26 +238,26 @@ end
 (* Profunctor dimap defined using lmap and rmap *)
 module Profunctor_Using_Ext(PF: ProfunctorExt):Profunctor = struct
   type ('a, 'b) p = ('a, 'b) PF.p
-  let dimap : 'a 'b 'c 'd. ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p = fun f g -> (PF.lmap f <.> PF.rmap g)
+  let dimap f g = (PF.lmap f <.> PF.rmap g)
 end
 
 (** Profunctor lmap and rmap defined using dimap *)
 module ProfunctorExt_Using_Dimap(PF: Profunctor): ProfunctorExt = struct
   type ('a, 'b) p = ('a, 'b) PF.p
-  let lmap : 'a 'b 'c. ('a -> 'b) -> ('b, 'c) PF.p -> ('a, 'c) PF.p = fun f -> PF.dimap f id
-  let rmap : 'a 'b 'c. ('b -> 'c) -> ('a, 'b) PF.p -> ('a, 'c) PF.p = fun g -> PF.dimap id g
-end;;
+  let lmap f = PF.dimap f id
+  let rmap g = PF.dimap id g
+end
 ```
 - Profunctor Implementation for function type
 ```ocaml
 module ProfunctorArrow : Profunctor = struct
   type ('a, 'b) p = 'a -> 'b
-  let dimap : 'a 'b 'c 'd. ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p = fun f g p -> g <.> p <.> f
+  let dimap f g p = g <.> p <.> f
 end
 module ProfunctorExtArrow : ProfunctorExt = struct
   type ('a, 'b) p = 'a -> 'b
-  let lmap : 'a 'b 'c. ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p = fun f p -> (flip (<.>)) f p
-  let rmap : 'a 'b 'c. ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p = (<.>)
+  let lmap f p = (flip (<.>)) f p
+  let rmap = (<.>)
 end
 ```
 - Profunctor : C^op x D -> Set
