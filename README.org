@@ -9,3 +9,5 @@ Thanks to @mseri for offering to do code review.
 If you find any mistakes or want to improve code snippets, please submit a PR.
 
 *** Currently working on auto inserting the snippets from this repo to the book.
+
+*** July 8th, 2019 - Submitted the PDF version of Chapter 1 with the snippets from this repo for review - https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201/
