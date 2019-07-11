@@ -1,17 +1,21 @@
 # Products and Coproducts
+### Utilities needed to compile the code below
+```ocaml
+# let compose f g x = f (g x)
+val compose : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
+# let id x = x
+val id : 'a -> 'a = <fun>
+```
+## Universal Construction
 * Universal Construction
   - Defining objects in terms of their relationships.
 * Initial Object
   - The object that has one and only arrow to any object in the category.
   - This object is unique upto isomorphism.
 * Absurd definition
-```ocaml
-# type void
-type void
-```
-```ocaml
-# let rec absurd (x:void) = absurd x
-val absurd : void -> 'a = <fun>
+```OCaml
+type void (* Uninhabited type *)
+val absurd : void -> 'a
 ```
 * Terminal Object
   - One and only morphism coming to it from any object in the category.
@@ -34,15 +38,10 @@ val no : 'a -> bool = <fun>
 * Propositional equality, intensional equality, extensional equality and equality as a path in homotopy type theory.
 * Isomorphism is an even weaker notion of equivalence.
 * Isomorphism - Object that look the same and have an one to one mapping between them(Invertible morphism)
-```ocaml
-# let compose f g x = f (g x)
-val compose : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
-# let id x = x
-val id : 'a -> 'a = <fun>
-```
 * Pseudo Ocaml for expression function equality
 ```OCaml
 compose f g = id
+compose g f = id
 ```
 * Initial and Terminal objects are *unique upto unique isomorphism*.
 * This uniqueness upto unique isomorphism is the basis for all universal construction.
@@ -56,10 +55,8 @@ val fst : 'a * 'b -> 'a = <fun>
 val snd : 'a * 'b -> 'b = <fun>
 ```
 ```ocaml
-# let fst (a,_) = a
-val fst : 'a * 'b -> 'a = <fun>
-# let snd (_, b) = b
-val snd : 'a * 'b -> 'b = <fun>
+let fst (a,_) = a
+let snd (_, b) = b
 ```
 * Object *c* and two morphisms *p* and *q* connecting it to *a* and *b*
 ```ocaml
@@ -92,30 +89,24 @@ module Chapter5_Product_Example2: Chapter5_Product = struct
 end
 ```
 * P' and Q' from *p* and *q* using *m*
-```ocaml
-# let m (x:int) = x
-val m : int -> int = <fun>
-# let p' = compose Chapter5_Product_Example.p m
-val p' : int -> int = <fun>
-# let q' = compose Chapter5_Product_Example.q m
-val q' : int -> bool = <fun>
+```OCaml
+let p' = compose Chapter5_Product_Example.p m
+let q' = compose Chapter5_Product_Example.q m
 ```
 * m as a function returning pair (int, bool)
 ```ocaml
-# let m (x:int) = (x, true)
-val m : int -> int * bool = <fun>
-# let p x = fst (m x)
-val p : int -> int = <fun>
-# let q x = snd (m x)
-val q : int -> bool = <fun>
+let m (x:int) = (x, true)
+```
+```ocaml
+let p x = fst (m x)
+let q x = snd (m x)
 ```
 * With, m as a function taking (int, int, bool)
 ```ocaml
-# let m ((x,_,b): int * int * bool) = (x, b)
-val m : int * int * bool -> int * bool = <fun>
+let m ((x,_,b): int * int * bool) = (x, b)
 ```
 * Pseudo OCaml showing function equivalence
-```
+```OCaml
 fst = compose p m'
 snd = compose q m'
 ```
@@ -135,8 +126,6 @@ module type Chapter5_product_projection_example = functor (Product : Chapter5_Pr
 sig
   val m : Product.c -> Product.a * Product.b
 end
-```
-```ocaml
 module ProjectionImpl(Product:Chapter5_Product) = struct
   let m c = (Product.p c, Product.q c)
 end
@@ -147,8 +136,6 @@ module type Factorizer = functor (Product: Chapter5_Product) ->
 sig
   val factorizer : (Product.c -> Product.a) -> (Product.c -> Product.b) -> (Product.c -> Product.a * Product.b)
 end
-```
-```ocaml
 module FactorizerImpl(Product:Chapter5_Product) = struct
   let factorizer ca cb = (Product.p ca, Product.q cb)
 end
@@ -164,7 +151,7 @@ module type CoProduct = sig
 end
 ```
 * Pseudo Ocaml showing function equivalence
-```
+```OCaml
 i' == compose m i
 j' == compose m j
 ```

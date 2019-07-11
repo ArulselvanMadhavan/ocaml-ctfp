@@ -15,21 +15,20 @@ end
 ```ocaml
 module Chapter2_Bottom : Chapter2_DeclareFunction =
 struct
-  let f b = failwith "Not Implemented"
+  let f (b:bool):bool = failwith "Not Implemented"
 end
 ```
 * Bottom is also a member of bool -> bool
 ```ocaml
 module Chapter2_Bottom : Chapter2_DeclareFunction =
 struct
-  let f = fun _ -> failwith "Not implemented"
+  let f : bool -> bool = fun _ -> failwith "Not implemented"
 end
 ```
 * Functions that return bottom are called /Partial/
 * /Hask/ can be treated as /Set/
 * Factorial Function in OCaml
 ```ocaml
-# open Core
 # let fact n =
   List.fold (List.range 1 n) ~init:1 ~f:( * )
 val fact : int -> int = <fun>
@@ -37,10 +36,7 @@ val fact : int -> int = <fun>
 * Absurd in OCaml
 ```ocaml
 type void
-```
-```ocaml
-# let rec absurd (x:void) = absurd x;;
-val absurd : void -> 'a = <fun>
+let rec absurd (x:void) = absurd x
 ```
 * Function taking unit and returning any type
 ```ocaml

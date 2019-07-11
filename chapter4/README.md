@@ -3,6 +3,10 @@
 ```ocaml
 type 'a writer = 'a * string
 ```
+* Morphisms from an arbitrary type to Writer type
+```OCaml
+'a -> 'b writer
+```
 * Kleisli for Writer
 ```ocaml
 module type Kleisli =

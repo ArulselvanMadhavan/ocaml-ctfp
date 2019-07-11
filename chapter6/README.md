@@ -9,6 +9,9 @@ val swap : 'a * 'b -> 'b * 'a = <fun>
 ```
 * Nesting pairs are isomorphic.(Pseudo OCaml)
 ```OCaml
+(('a * 'b) * 'c)
+```
+```OCaml
 ('a * ('b * 'c))
 ```
 * Types are different but elements are in one-to-one correspondence.
@@ -90,7 +93,10 @@ val atomic_number : element -> int = <fun>
 # let starts_with_symbol {name;symbol;_} = String.is_prefix name ~prefix:symbol
 val starts_with_symbol : element -> bool = <fun>
 ```
-* OCaml only allows special characters in the infix operator. So, the above function name cannot be applied be infix.
+* Infix application only available for special characters
+```ocaml
+(* OCaml only allows special characters in the infix operator. So, the above function name cannot be applied be infix. *)
+```
 ## Sum Types
 * Either type (Similar to OCaml's builtin Result type)
 ```ocaml
@@ -138,15 +144,14 @@ type 'a list = Nil | Cons of 'a * 'a list
 * Maybe Tail
 ```ocaml
 type 'a maybe = Nothing | Just of 'a
-```
-```ocaml
-# let maybe_tail = function | Nil -> Nothing | Cons (_, xs) -> Just xs
-val maybe_tail : 'a list -> 'a list maybe = <fun>
+let maybe_tail = function | Nil -> Nothing | Cons (_, xs) -> Just xs
 ```
 ## Algebra of Types
 * Pseudo Ocaml representation of types
 ```OCaml
 'a * ('b, 'c) either
+```
+```OCaml
 ('a * 'b, 'c * 'd) either
 ```
 * Isomorphic example

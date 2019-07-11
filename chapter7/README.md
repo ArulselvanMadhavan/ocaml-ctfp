@@ -42,29 +42,30 @@ module type Maybe_Functor = sig
 end
 ```
 - Maybe Functor Example implementation.
-```
-# let fmap f = function | None -> None | Some x -> Some (f x)
+```ocaml
+# let fmap f = function
+    | None -> None
+    | Some x -> Some (f x)
+val fmap : ('a -> 'b) -> 'a option -> 'b option = <fun>
 ```
 - Id example
 ```ocaml
 # let id x = x
 val id : 'a -> 'a = <fun>
 ```
-- Functor Representation in OCaml
+### Utilities needed to compile the code(Can skip this section)
 ```ocaml
 module type Functor = sig 
   type 'a t 
   val fmap : ('a -> 'b) -> 'a t -> 'b t 
 end
-```
-- Functor for Option type 
-```ocaml
+(* Functor for Option type *)
 module OptionF : (Functor with type 'a t = 'a option) = struct 
   type 'a t = 'a option
   let fmap f = function | None -> None | Some x -> Some (f x) 
 end 
 ```
-- Test Functor laws. 
+### Test functor laws
 - Test Id law (Syntactically correct OCaml but will not be compiled by mdx)
 ```OCaml
 module Test_Functor_Id(F: Functor) = struct 
@@ -98,10 +99,10 @@ type point = Pt of float * float
 ```
 - Eq instance for Point 
 ```ocaml
-module Float_Eq = struct 
-  type float 
-  let (==) x y = x = y 
-end 
+module Point_Eq(E:Eq with type a = float) = struct
+  type a = point
+  let (==) (Pt (p1x, p1y)) (Pt (p2x, p2y)) = E.(p1x == p2x) && E.(p2x == p2y)
+end
 ```
 - Functor for OCaml 
 ```ocaml
@@ -114,7 +115,9 @@ end
 ```ocaml
 module Option_Functor:(Functor with type 'a t = 'a option) = struct 
   type 'a t = 'a option 
-  let fmap f = function | None -> None | Some x -> Some (f x) 
+  let fmap f = function
+    | None -> None
+    | Some x -> Some (f x)
 end 
 ```
 - List Functor 
@@ -130,14 +133,18 @@ end
 ```
 - Fmap impl for list 
 ```ocaml
-# let rec fmap f = function | Nil -> Nil | Cons (x, xs) -> Cons (f x, fmap f xs) 
+# let rec fmap f = function
+    | Nil -> Nil
+    | Cons (x, xs) -> Cons (f x, fmap f xs)
 val fmap : ('a -> 'b) -> 'a list -> 'b list = <fun>
 ```
 - Functor instance for List 
 ```ocaml
 module List_Functor : (Functor with type 'a t = 'a list) = struct 
   type 'a t = 'a list 
-  let rec fmap f = function | Nil -> Nil | Cons (x, xs) -> Cons (f x, fmap f xs) 
+  let rec fmap f = function
+    | Nil -> Nil
+    | Cons (x, xs) -> Cons (f x, fmap f xs)
 end 
 ```
 ### Reader Functor
