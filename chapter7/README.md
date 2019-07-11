@@ -6,7 +6,11 @@
 - Collapsing Functor
   - Maps every object in the source category to one selected object in the target category.
   - Maps every morphism to identity morphism.
-  
+
+### Utitlities
+```ocaml
+let compose f g x = f (g x)
+```
 ### Maybe Functor
 - Maybe functor
 ```ocaml
@@ -157,12 +161,11 @@ type ('a, 'b) t = 'a -> 'b
 module type T = sig
   type t
 end
-
 module Partially_Applied_FunctionType(T : T) = struct
   type 'b t = T.t -> 'b
 end
 ```
-- fmap for Reader(Syntactically correct OCaml but mdx 
+- fmap for Reader
 ```ocaml
 module type Reader_Fmap_Example = sig
   val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b
@@ -175,25 +178,16 @@ module Reader_Functor(T: T):Functor = struct
   let fmap f ra = fun r -> f (ra r)
 end
 ```
-- Reader Functor Implementation using compose
-```ocaml
-
-# let (<.>) f g x = f (g x)
-val ( <.> ) : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
-
-# let fmap (f: 'a -> 'b) (g: 'r -> 'a) = f <.> g
-val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b = <fun>
-```
 - Reader Functor implementation - Even simpler
 ```ocaml
-# let fmap: ('a -> 'b) -> ('r -> 'a) -> ('r -> 'b) = (<.>)
+# let fmap: ('a -> 'b) -> ('r -> 'a) -> ('r -> 'b) = compose
 val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b = <fun>
 ```
 
 ### Functors as Containers
 - Infinite list
 ```ocaml
-# let nats = Stream.from (fun i -> Some (i + 1))
+# let nats = Caml.Stream.from (fun i -> Some (i + 1))
 val nats : int Stream.t = <abstr>
 ```
 - Functors can be considered as a container of value(s) of the type over which it is parameterized or as containing a recipe for generating those values.
@@ -237,13 +231,9 @@ val mis : int list option = Some (Cons (1, Cons (2, Cons (3, Nil))))
 - : ('a -> 'b) -> 'a option -> 'b option = <fun>
 # List_Functor.fmap
 - : ('a -> 'b) -> 'a list -> 'b list = <fun>
-# let fmapC = Option_Functor.fmap <.> List_Functor.fmap
-val fmapC :
-  ('_weak1 -> '_weak2) -> '_weak1 list option -> '_weak2 list option = <fun>
-(* To avoid the weak typing you need to eta expand it *)
-# let fmapC' f l = (Option_Functor.fmap <.> List_Functor.fmap) f l
-val fmapC' : ('a -> 'b) -> 'a list option -> 'b list option = <fun>
-# fmapC' (square) mis
+# let fmapC f l = (compose Option_Functor.fmap List_Functor.fmap) f l
+val fmapC : ('a -> 'b) -> 'a list option -> 'b list option = <fun>
+# fmapC (square) mis
 - : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
 ```
 - Viewing fmap as a function of one argument
