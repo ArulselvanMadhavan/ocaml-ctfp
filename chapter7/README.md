@@ -186,7 +186,7 @@ val fmap : ('a -> 'b) -> ('r -> 'a) -> 'r -> 'b = <fun>
 ### Functors as Containers
 - Infinite list
 ```ocaml
-# let nats = Caml.Stream.from (fun i -> Some (i + 1))
+# let nats = Stream.from (fun i -> Some (i + 1))
 val nats : int Stream.t = <abstr>
 ```
 - Functors can be considered as a container of value(s) of the type over which it is parameterized or as containing a recipe for generating those values.
@@ -205,7 +205,7 @@ end
 ```ocaml
 module Const_Functor(T : T) : Functor = struct
   type 'a t = (T.t, 'a) const
-  let fmap f = function | Const c -> Const c
+  let fmap f (Const c) = Const c (* or even let fmap _ c = c *)
 end
 ```
 ### Functor Composition
@@ -233,7 +233,10 @@ val mis : int list option = Some (Cons (1, Cons (2, Cons (3, Nil))))
 # let fmapC = Option_Functor.fmap <.> List_Functor.fmap
 val fmapC :
   ('_weak1 -> '_weak2) -> '_weak1 list option -> '_weak2 list option = <fun>
-# fmapC (square) mis
+(* To avoid the weak typing you need to eta expand it *)
+# let fmapC' f l = (Option_Functor.fmap <.> List_Functor.fmap) f l
+val fmapC' : ('a -> 'b) -> 'a list option -> 'b list option = <fun>
+# fmapC' (square) mis
 - : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
 ```
 - Viewing fmap as a function of one argument
