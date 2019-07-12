@@ -213,28 +213,23 @@ end
 - A composition of two functors when acting on objects is just the composition of their respective object mappings.
 - Same for morphisms.
 ```ocaml
-# let maybe_tail = function | [] -> None | _ :: xs -> Some xs
+# let maybe_tail = function 
+    | [] -> None 
+    | _ :: xs -> Some xs
 val maybe_tail : 'a list -> 'a list option = <fun>
 ```
 - Using fmap of respective functors
 ```ocaml
-# let square x = x * x
-val square : int -> int = <fun>
-# let mis = Some (Cons (1, Cons (2, Cons (3, Nil))))
-val mis : int list option = Some (Cons (1, Cons (2, Cons (3, Nil))))
-# Option_Functor.fmap (List_Functor.fmap square) mis
-- : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
+let square x = x * x
+let mis = Some (Cons (1, Cons (2, Cons (3, Nil))))
+let mis2 = Option_Functor.fmap (List_Functor.fmap square) mis
 ```
 - Composing fmap of list and option functors
 ```ocaml
-# Option_Functor.fmap
-- : ('a -> 'b) -> 'a option -> 'b option = <fun>
-# List_Functor.fmap
-- : ('a -> 'b) -> 'a list -> 'b list = <fun>
-# let fmapC f l = (compose Option_Functor.fmap List_Functor.fmap) f l
-val fmapC : ('a -> 'b) -> 'a list option -> 'b list option = <fun>
-# fmapC (square) mis
-- : int list option = Some (Cons (1, Cons (4, Cons (9, Nil))))
+let fmapO = Option_Functor.fmap
+let fmapL = List_Functor.fmap
+let fmapC f l = (compose fmapO fmapL) f l
+let mis2 = fmapC (square) mis
 ```
 - Viewing fmap as a function of one argument
 ```ocaml
