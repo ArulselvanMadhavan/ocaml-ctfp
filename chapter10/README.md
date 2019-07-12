@@ -6,7 +6,7 @@ module type Functor = sig
   type 'a t 
   val fmap : ('a -> 'b) -> 'a t -> 'b t 
 end
-let (<.>) f g x = f (g x)
+let compose f g x = f (g x)
 module type Contravariant = sig
   type 'a t
   val contramap : ('b -> 'a) -> 'a t -> 'b t
@@ -30,14 +30,20 @@ val alpha : 'a . 'a f -> 'a g
 ```OCaml
 val alpha : 'a f -> 'a g
 ```
+- Polymorphic functions like this automatically satisfy the naturality condition.
+```OCaml
+val alpha : 'a f -> 'a g
+```
 - Free theorems are the naturality conditions, in the case of natural transformations expressed using parametric polymorphism.
 ```ocaml
-# let safe_head = function | [] -> None | x :: xs -> Some x
+# let safe_head = function
+    | [] -> None
+    | x :: xs -> Some x
 val safe_head : 'a list -> 'a option = <fun>
 ```
 - Verifying the Naturality condition(Pseudo OCaml, since function equality cannot be expressed)
 ```OCaml
-let fmap f <.> safe_head = safe_head <.> fmap f
+compose (fmap f) safe_head = compose safe_head (fmap f)
 ```
 - Cases to handle
 ```OCaml
@@ -56,7 +62,9 @@ let safe_head (fmap f (x :: xs)) = safe_head (f x :: f xs) = Some (f x)
 ```
 - Implemenation of fmap for lists
 ```ocaml
-# let rec fmap f = function | [] -> [] | (x :: xs) -> f x :: fmap f xs
+# let rec fmap f = function
+    | [] -> []
+    | (x :: xs) -> f x :: fmap f xs
 val fmap : ('a -> 'b) -> 'a list -> 'b list = <fun>
 ```
 - Implementation of fmap for option type
@@ -68,12 +76,15 @@ val fmap : ('a -> 'b) -> 'a option -> 'b option = <fun>
 ```
 - Natural transformation to or from the *Const* functor looks just like a function that's polymorphic in either the return type or argument type.
 ```ocaml
-# let rec length : 'a list -> (int, 'a) const = function 
+(** OCaml requires mutually recursive functions to be defined together *)
+let rec length : 'a list -> (int, 'a) const = function
     | [] -> Const 0 
     | (_ :: xs) -> Const (1 + un_const (length xs))
     and un_const : 'c 'a. ('c, 'a) const -> 'c = function | Const c -> c
-val length : 'a list -> (int, 'a) const = <fun>
-val un_const : ('c, 'a) const -> 'c = <fun>
+```
+- unconst defined separately
+```ocaml
+let un_const : 'c 'a. ('c, 'a) const -> 'c = function | Const c -> c
 ```
 - In practice, length is defined as
 ```OCaml
@@ -94,7 +105,7 @@ type ('e, 'a) reader = Reader of ('e -> 'a)
 module Reader_Functor(T : sig type e end) : Functor = struct
   type 'a t = (T.e, 'a) reader
   let fmap : 'a 'b. ('a -> 'b) -> 'a t -> 'b t = fun f -> function
-    | Reader r -> Reader (f <.> r)
+    | Reader r -> Reader (compose f r)
 end
 ```
 - Natural Transformation from Reader () a -> Maybe a
@@ -126,7 +137,7 @@ type ('r, 'a) op = Op of ('a -> 'r)
 module Op_Contravariant(T : sig type r end): Contravariant = struct
   type 'a t = (T.r, 'a) op
   let contramap : ('b -> 'a) -> 'a t -> 'b t = fun f -> function
-    | Op g -> Op (g <.> f)
+    | Op g -> Op (compose g f)
 end
 ```
 - predToStr
@@ -137,14 +148,12 @@ val pred_to_str : (bool, 'a) op -> (string, 'a) op = <fun>
 ```
 - Contravariant functors satisfy the opposite naturality condition.
 ```OCaml
-contramap f <.> pred_to_str = pred_to_str <.> contramap f
+compose (contramap f) pred_to_str = compose pred_to_str (contramap f)
 ```
 - Op Bool contramap signature
 ```ocaml
-# module Op_Bool = Op_Contravariant(struct type r = bool end)
-module Op_Bool : Contravariant
-# Op_Bool.contramap
-- : ('b -> 'a) -> 'a Op_Bool.t -> 'b Op_Bool.t = <fun>
+module Op_Bool = Op_Contravariant(struct type r = bool end)
+let op_bool_contramap : ('b -> 'a) -> 'a Op_Bool.t -> 'b Op_Bool.t = Op_Bool.contramap
 ```
 - Type constructors that are neither covariant or contravariant.
 ```OCaml
