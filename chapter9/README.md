@@ -29,12 +29,12 @@ type ('a, 'b) either = Left of 'a | Right of 'b
 ```
 - Multi argument functions
 ```ocaml
-# let catstr : string -> string -> string = fun s s' -> String.concat ~sep:"" [s;s']
+# let catstr s s' -> StringLabels.concat ~sep:"" [s;s']
 val catstr : string -> string -> string = <fun>
 ```
 - Same function written using one argument functions
 ```ocaml
-# let catstr : string -> string -> string = fun s -> fun s' -> String.concat ~sep:"" [s;s']
+# let catstr = fun s -> fun s' -> StringLabels.concat ~sep:"" [s;s']
 val catstr : string -> string -> string = <fun>
 ```
 - Greet
@@ -48,12 +48,12 @@ val greet : string -> string = <fun>
 ```
 - curry
 ```ocaml
-# let curry : ('a * 'b -> 'c) -> ('a -> 'b -> 'c) = fun f a b -> f (a, b)
+# let curry f a b = f (a, b)
 val curry : ('a * 'b -> 'c) -> 'a -> 'b -> 'c = <fun>
 ```
 - uncurry
 ```ocaml
-# let uncurry : ('a -> 'b -> 'c) -> (('a * 'b) -> 'c) = fun f p -> f (fst p) (snd p)
+# let uncurry f p = f (fst p) (snd p)
 val uncurry : ('a -> 'b -> 'c) -> 'a * 'b -> 'c = <fun>
 ```
 - Factorizer
@@ -92,7 +92,7 @@ end
 - Implementation
 ```ocaml
 module Exp_Sum_Impl : Exponential_Of_Sums_Example = struct
-  let f : (int, float) either -> string = function 
+  let f = function 
   | Left n -> if n < 0 then "Negative int" else "Positive int"
   | Right x -> if Float.compare x 0.4 < 0 then "Negative double" else "Positive double"  
 end
@@ -106,25 +106,27 @@ end
 - Function type -> logical implication
 - Every type can be interpreted as a proposition.
 - Writing programs is same as proving theorems.
-- eval example
+- eval example (pseudo OCaml)
 ```OCaml
-val eval : (('a -> 'b), 'a) -> 'b
+val eval : (('a -> 'b), 'a) -> 'b 
 ```
 - eval implementation
 ```ocaml
-# let eval : ('a -> 'b) * 'a -> 'b = fun (f,a) -> f a
+# let eval (f,a) = f a
 val eval : ('a -> 'b) * 'a -> 'b = <fun>
 ```
-- Mapping a V b => a to types
-```OCaml
+- Mapping a V b => a to types (pseudo OCaml)
+```ocaml
 ('a, 'b) either -> 'a
 ```
-- Absurd
-```OCaml
+- Absurd (pseudo OCaml)
+```ocaml
 val absurd : void -> 'a
 ```
 - Absurd implementation
-```
+```ocaml
+# type void
 type void
 # let rec absurd (a : void) = absurd a
+val absurd : void -> 'a = <fun>
 ```
