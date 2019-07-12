@@ -10,9 +10,8 @@ If you find any mistakes or want to improve code snippets, please submit a PR.
 
 *** Currently working on auto inserting the snippets from this repo to the book.
 
-** Updates:
-
-- July 8th, 2019 - Submitted the PDF version of Chapter 1 with the snippets from this repo for review - https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201/
+** Completed work:
+- Chapters 1 through 11 are available in the pdf format here: https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201
 
 ** TODO:
 - I am currently using a modified version of `mdx` to move snippets from this repo to the book repo - https://github.com/ArulselvanMadhavan/milewski-ctfp-pdf/tree/ocaml . Need to automate this and make it part of makefile
