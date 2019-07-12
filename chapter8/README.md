@@ -1,10 +1,10 @@
 # Functoriality
-### Utitlities needed for the code below
+### Utilities needed for the code below
 ```ocaml
 # let id : 'a -> 'a = fun x -> x
 val id : 'a -> 'a = <fun>
-# let (<.>) f g x = f (g x)
-val ( <.> ) : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
+# let compose f g x = f (g x)
+val compose : ('a -> 'b) -> ('c -> 'a) -> 'c -> 'b = <fun>
 ```
 ```ocaml
 (* Functor definition given in previous chapter *)
@@ -181,7 +181,7 @@ type ('r, 'a) reader = 'r -> 'a
 ```ocaml
 module ReaderFunctor(In: sig type r end): Functor = struct
   type 'a t = (In.r, 'a) reader
-  let fmap f g = f <.> g
+  let fmap f g = compose f g
 end
 ```
 - Reader flipped - Op
@@ -205,7 +205,7 @@ end
 ```ocaml
 module OpContravariant(In : sig type r end) : Contravariant = struct
   type 'a t = (In.r, 'a) op
-  let contramap f g = g <.> f
+  let contramap f g = compose g f
 end
 ```
 - Flip
@@ -215,7 +215,7 @@ val flip : ('a -> 'b -> 'c) -> 'b -> 'a -> 'c = <fun>
 ```
 - Contramap and flip
 ```ocaml
-# let contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip (<.>) f g
+# let contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = fun f g -> flip compose f g
 val contramap : ('b -> 'a) -> ('r, 'a) op -> ('r, 'b) op = <fun>
 ```
 ### Profunctors
@@ -238,7 +238,7 @@ end
 (* Profunctor dimap defined using lmap and rmap *)
 module Profunctor_Using_Ext(PF: ProfunctorExt):Profunctor = struct
   type ('a, 'b) p = ('a, 'b) PF.p
-  let dimap f g = (PF.lmap f <.> PF.rmap g)
+  let dimap f g = compose (PF.lmap f) (PF.rmap g)
 end
 
 (** Profunctor lmap and rmap defined using dimap *)
@@ -252,12 +252,12 @@ end
 ```ocaml
 module ProfunctorArrow : Profunctor = struct
   type ('a, 'b) p = 'a -> 'b
-  let dimap f g p = g <.> p <.> f
+  let dimap f g p = compose g (compose p f)
 end
 module ProfunctorExtArrow : ProfunctorExt = struct
   type ('a, 'b) p = 'a -> 'b
-  let lmap f p = (flip (<.>)) f p
-  let rmap = (<.>)
+  let lmap f p = (flip compose) f p
+  let rmap = compose
 end
 ```
 - Profunctor : C^op x D -> Set
