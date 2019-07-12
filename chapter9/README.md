@@ -29,12 +29,12 @@ type ('a, 'b) either = Left of 'a | Right of 'b
 ```
 - Multi argument functions
 ```ocaml
-# let catstr s s' -> StringLabels.concat ~sep:"" [s;s']
+# let catstr s s' = String.concat ~sep:"" [s;s']
 val catstr : string -> string -> string = <fun>
 ```
 - Same function written using one argument functions
 ```ocaml
-# let catstr = fun s -> fun s' -> StringLabels.concat ~sep:"" [s;s']
+# let catstr = fun s -> fun s' -> String.concat ~sep:"" [s;s']
 val catstr : string -> string -> string = <fun>
 ```
 - Greet
@@ -116,17 +116,10 @@ val eval : (('a -> 'b), 'a) -> 'b
 val eval : ('a -> 'b) * 'a -> 'b = <fun>
 ```
 - Mapping a V b => a to types (pseudo OCaml)
-```ocaml
+```OCaml
 ('a, 'b) either -> 'a
 ```
 - Absurd (pseudo OCaml)
-```ocaml
+```OCaml
 val absurd : void -> 'a
-```
-- Absurd implementation
-```ocaml
-# type void
-type void
-# let rec absurd (a : void) = absurd a
-val absurd : void -> 'a = <fun>
 ```
