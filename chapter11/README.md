@@ -1,5 +1,5 @@
 # Declarative Programming
-### Utilities
+### Utilities (Needed for compiling the code. Skip this section)
 ```ocaml
 let compose g f x = g (f x)
 ```
