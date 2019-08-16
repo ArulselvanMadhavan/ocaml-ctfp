@@ -1,4 +1,8 @@
 # Limits and Colimits
+### Utilities used by the code below
+```ocaml
+let compose f g x = f (g x)
+```
 - In CT, everything is related to everything and can be viewed from many angles.
 ### Generalizing products
 - 2 category
@@ -15,4 +19,37 @@
 ```OCaml
 val p1 = compose p m
 val q1 = compose q m
+```
+- Contramap definition
+```ocaml
+# let contramap : 'c_prime 'c 'limD. ('c_prime -> 'c) -> ('c -> 'limD) -> ('c_prime -> 'limD) = fun f u -> compose u f
+val contramap : ('c_prime -> 'c) -> ('c -> 'limD) -> 'c_prime -> 'limD =
+  <fun>
+```
+- Presheaves: Contravariant functor from any category C to Set
+- Natural Isomorphism: Natural Transformation whose every component is an isomorphism.
+### Examples of limits
+- Equalizer
+```OCaml
+val f : 'a -> 'b
+val g : 'a -> 'b
+```
+```OCaml
+val p : 'c -> 'a
+val q : 'c -> 'b
+```
+```OCaml
+q = compose f p
+q = compose g p
+```
+```OCaml
+(** Pseudo OCaml expressing function equality **)
+compose f p = compose g p
+```
+```ocaml
+let f (x, y) = 2 * y + x
+let g (x, y) = y - x
+```
+```OCaml
+let p t = (t, (-2) * t)
 ```
