@@ -50,6 +50,56 @@ compose f p = compose g p
 let f (x, y) = 2 * y + x
 let g (x, y) = y - x
 ```
-```OCaml
+```ocaml
 let p t = (t, (-2) * t)
 ```
+```OCaml
+(** Pseudo OCaml expressing function equality **)
+compose f p' = compose g p'
+```
+```ocaml
+let p' () = (0, 0)
+```
+```OCaml
+let p' = compose p h
+```
+```ocaml
+let h () = 0
+```
+- Pullback
+```OCaml
+val f : 'a -> 'b
+val g : 'c -> 'b
+```
+- cospan
+```OCaml
+val p : 'd -> 'a
+val q : 'd -> 'c
+val r : 'd -> 'b
+```
+- Commutativity conditions
+```OCaml
+compose g q = compose f p
+```
+```ocaml
+let f x = 1.23
+```
+```ocaml
+module type Contravariant = sig
+  type 'a t
+  val contramap : ('b -> 'a) -> 'a t -> 'b t
+end
+type 'a tostring = ToString of ('a -> string)
+
+module ToStringInstance : Contravariant = struct
+  type 'a t = 'a tostring
+  let contramap f (ToString g) = ToString (compose g f)
+end
+```
+```OCaml
+('b 'c either) tostring ~ ('b -> string, 'c -> string)
+```
+```OCaml
+'r -> ('a, 'b) ~ ('r -> 'a, 'r -> 'b)
+```
+
