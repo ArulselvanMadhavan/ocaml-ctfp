@@ -104,7 +104,6 @@ let f x = 1.23
 - Functors preserve almost everything.
 - Uniqueness condition may be the only affected property
 - Hom-functor C^op x C -> Set
-- 
 ```ocaml
 module type Contravariant = sig
   type 'a t
