@@ -16,7 +16,3 @@ let h = fun x ->
   let y = f x in
   g y
 ```
-- Compose (pipe)
-```OCaml
-let h = fun x -> x |> f |> g
-```
