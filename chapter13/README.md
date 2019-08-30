@@ -26,3 +26,38 @@ end;;
 List.append [2] [3] = [2; 3]
 ```
 ### Free monoid universal construction
+```OCaml
+let h (a * b) = h a * h b
+```
+- Homomorphism from lists of integers to integers
+```ocaml
+List.append [2] [3] = [2; 3]
+```
+- becomes multiplication
+```ocaml
+2 * 3 = 6
+```
+- Let p be the function that identifies the set of generators inside the X-ray image of monoid m.
+```ocaml
+module type FreeMonoidRep = functor (F : Functor) -> sig
+  type x
+  type m
+  val p : x -> m F.t
+end
+```
+- Similar function on a different monoid n can be
+```ocaml
+module type FreeMonoidRep = functor (F : Functor) -> sig
+  type x
+  type n
+  val q : x -> n F.t
+end
+```
+- Homomorphism between monoids
+```OCaml
+val h : m -> n
+```
+- Building q through p
+```OCaml
+val q = compose uh p
+```
