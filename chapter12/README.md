@@ -17,12 +17,12 @@ let compose f g x = f (g x)
   - NT component - 'c' to 'a' is a morphism - p
   - NT component - 'c' to 'b' is a morphism - q
 ```OCaml
-val p1 = compose p m
-val q1 = compose q m
+let p1 = compose p m
+let q1 = compose q m
 ```
 - Contramap definition
 ```ocaml
-# let contramap : 'c_prime 'c 'limD. ('c_prime -> 'c) -> ('c -> 'limD) -> ('c_prime -> 'limD) = fun f u -> compose u f
+# let contramap : ('c_prime -> 'c) -> ('c -> 'limD) -> ('c_prime -> 'limD) = fun f u -> compose u f
 val contramap : ('c_prime -> 'c) -> ('c -> 'limD) -> 'c_prime -> 'limD =
   <fun>
 ```
