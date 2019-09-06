@@ -1,4 +1,12 @@
 # Free Monoids
+## Utilities used by the code below
+```ocaml
+module type Functor = sig 
+  type 'a t 
+  val fmap : ('a -> 'b) -> 'a t -> 'b t 
+end
+let compose f g x = f (g x)
+```
 - Categories - strongly typed languages
 - Monoids - untyped languages
 - Monoid - Category with a single object, where all logic is encoded in rules of morphism composition.
@@ -21,7 +29,7 @@ end
   let mappend xs ys = List.append xs ys
 end;;
 ```
-```ocaml
+```OCaml
 2 * 3 = 6
 List.append [2] [3] = [2; 3]
 ```
@@ -30,7 +38,7 @@ List.append [2] [3] = [2; 3]
 let h (a * b) = h a * h b
 ```
 - Homomorphism from lists of integers to integers
-```ocaml
+```OCaml
 List.append [2] [3] = [2; 3]
 ```
 - becomes multiplication
