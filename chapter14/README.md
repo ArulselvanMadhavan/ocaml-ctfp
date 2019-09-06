@@ -50,4 +50,28 @@ end
 - The mapping of objects from any category to hom-sets is functorial.
 - C^op x C -> Set
 ## Representable Functors
-- 
+- Structure preserving mapping to Set is called a *representation*.
+- Any functor F that is naturally isomorphic to hom-functor for some choice of a is called representable functor.
+- For F to be representable,
+  - an object a in C
+  - Nat Transformation(between functors) - alpha - C(a, -) to F
+  - Nat Transformation - beta - F to C(a, -)
+  - Composition of these two Nat Trans is Identity Nat Trans
+  - alphaAtx :: C(a, x) -> Fx  
+```ocaml
+module type NatTrans_SetToF = functor (F : Functor) -> sig
+  val alpha : ('a -> 'x) -> 'x F.t
+end
+```
+- Pseudo OCaml expressing function equality
+```OCaml
+compose (F.fmap f) N.alpha = compose N.alpha (F.fmap f)
+```
+- Replacing fmap with function composition (since fmap on f is a reader functor on the right hand side)
+```OCaml
+F.fmap f (N.alpha h) = N.alpha (compose f h)
+```
+- Beta Transformation
+```ocaml
+
+```
