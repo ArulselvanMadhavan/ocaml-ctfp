@@ -71,7 +71,11 @@ compose (F.fmap f) N.alpha = compose N.alpha (F.fmap f)
 ```OCaml
 F.fmap f (N.alpha h) = N.alpha (compose f h)
 ```
-- Beta Transformation
+- Other Nat Transformation that goes opposite direction 
 ```ocaml
-
+module type NatTrans_FtoSet = functor(F : Functor) -> sig
+  val beta : 'x F.t -> ('a -> 'x)
+end
 ```
+- alpha . beta = id = beta . alpha
+- Nat Trans from C(a, -) to any Set-valued functor always exists
