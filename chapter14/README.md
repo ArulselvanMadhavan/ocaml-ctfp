@@ -59,13 +59,16 @@ end
   - Composition of these two Nat Trans is Identity Nat Trans
   - alphaAtx :: C(a, x) -> Fx  
 ```ocaml
-module type NatTrans_SetToF = functor (F : Functor) -> sig
-  val alpha : ('a -> 'x) -> 'x F.t
+module type NT_AX_FX = sig
+  type a
+  type 'x t
+  type r = {f : 'x. a -> 'x}
+  val alpha : r -> 'x t
 end
 ```
 - Pseudo OCaml expressing function equality
 ```OCaml
-compose (F.fmap f) N.alpha = compose N.alpha (F.fmap f)
+compose (F.fmap f) NT.alpha = compose NT.alpha (F.fmap f)
 ```
 - Replacing fmap with function composition (since fmap on f is a reader functor on the right hand side)
 ```OCaml
@@ -73,9 +76,49 @@ F.fmap f (N.alpha h) = N.alpha (compose f h)
 ```
 - Other Nat Transformation that goes opposite direction 
 ```ocaml
-module type NatTrans_FtoSet = functor(F : Functor) -> sig
-  val beta : 'x F.t -> ('a -> 'x)
+module type NT_FX_AX = sig
+  type a
+  type 'x t
+  val beta : 'x t -> (a -> 'x)
 end
 ```
 - alpha . beta = id = beta . alpha
-- Nat Trans from C(a, -) to any Set-valued functor always exists
+- Yoneda Lemma: Nat Trans from C(a, -) to any Set-valued functor always exists but it's not always invertible.
+- Alpha example
+```ocaml
+module NT_Impl(F: Functor with type 'a t = 'a list) : NT_AX_SetX with type a = int and type 'x t = 'x list = struct
+  type a = int
+  type 'x t = 'x list
+  let alpha: 'x. (int -> 'x) -> 'x list = fun h -> F.fmap h [12]
+end
+```
+- Naturality condition is equivalent to the composiability of map.
+```OCaml
+F.fmap f (F.fmap h [12]) = F.fmap (compose f h) [12]
+```
+- Beta with example on List and Int
+```ocaml
+# module type NT_ListX_IntX = NT_FX_AX with type a = int and type 'x t = 'x list
+```
+- Beta can't be implemented for List and Int combination. (When List is empty we can't return a value of type x)
+- So, List functor is not Representable.
+- Rep. functors are containers for memoized results of function calls
+- Representing type 'a' of C(a, -) is the key type to access values of a function.
+- *alpha* is called tabulate and *beta* is called index.
+- Representable functor
+```ocaml
+module type Representable = sig
+  type 'x t
+  type rep (* Representing type 'a' *)
+  val tabulate : (rep -> 'x) -> 'x t
+  val index : 'x t -> (rep -> 'x)
+end
+```
+- Stream type
+```ocaml
+type 'a stream = | Cons of 'a * 'a stream Lazy.t
+```
+- Representable functor Instance
+```ocaml
+
+```
