@@ -150,7 +150,7 @@ module type CoProduct = sig
   val j : b -> c
 end
 ```
-* Pseudo Ocaml showing function equivalence
+* Pseudo OCaml showing function equivalence
 ```OCaml
 i' == compose m i
 j' == compose m j
