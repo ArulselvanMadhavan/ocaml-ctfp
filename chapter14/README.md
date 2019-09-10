@@ -33,6 +33,11 @@ type ('a, 'x) op = 'x -> 'a
 ```
 - Contravariant instance
 ```ocaml
+module type Contravariant = sig
+  type 'a t
+  val contramap : ('a -> 'b) -> 'b t -> 'a t
+end
+
 module OpContravariant(T : sig type r end) : Contravariant = struct
   type 'a t = (T.r, 'a) op
   let contramap f h = fun b -> h (f b)
@@ -40,6 +45,13 @@ end
 ```
 - C(-, -) - If we allows both arguments to change
 ```ocaml
+module type Profunctor = sig
+  type ('a, 'b) p
+  val dimap : ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p 
+  val lmap : ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p 
+  val rmap : ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p 
+end
+
 module ProfunctorArrow : Profunctor = struct
   type ('a, 'b) p = 'a -> 'b
     let dimap f g p = compose g (compose p f)
@@ -85,7 +97,7 @@ end
 - alpha . beta = id = beta . alpha
 - Yoneda Lemma: Nat Trans from C(a, -) to any Set-valued functor always exists but it's not always invertible.
 - Alpha example
-```ocaml
+```OCaml
 module NT_Impl(F: Functor with type 'a t = 'a list) : NT_AX_SetX with type a = int and type 'x t = 'x list = struct
   type a = int
   type 'x t = 'x list
