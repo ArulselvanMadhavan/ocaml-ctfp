@@ -7,6 +7,17 @@ module type Functor = sig
 end
 let flip f b a = f a b
 let compose f g x = f (g x)
+module type Contravariant = sig
+  type 'a t
+  val contramap : ('b -> 'a) -> 'a t -> 'b t
+end
+module type Profunctor = sig
+  type ('a,'b) p
+  val dimap : ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p
+  val lmap : ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p
+  val rmap : ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p  
+end
+let add_one x = x + 1
 ```
 - Set theory - assembly language of mathematics
 - *Set* category of all sets
@@ -62,8 +73,7 @@ end
 module type NT_AX_FX = sig
   type a
   type 'x t
-  type r = {f : 'x. a -> 'x}
-  val alpha : r -> 'x t
+  val alpha : (a -> 'x) -> 'x t
 end
 ```
 - Pseudo OCaml expressing function equality
@@ -86,7 +96,7 @@ end
 - Yoneda Lemma: Nat Trans from C(a, -) to any Set-valued functor always exists but it's not always invertible.
 - Alpha example
 ```ocaml
-module NT_Impl(F: Functor with type 'a t = 'a list) : NT_AX_SetX with type a = int and type 'x t = 'x list = struct
+module NT_Impl(F: Functor with type 'a t = 'a list) : NT_AX_FX with type a = int and type 'x t = 'x list = struct
   type a = int
   type 'x t = 'x list
   let alpha: 'x. (int -> 'x) -> 'x list = fun h -> F.fmap h [12]
@@ -98,7 +108,11 @@ F.fmap f (F.fmap h [12]) = F.fmap (compose f h) [12]
 ```
 - Beta with example on List and Int
 ```ocaml
-# module type NT_ListX_IntX = NT_FX_AX with type a = int and type 'x t = 'x list
+module type NT_ListX_IntX = sig 
+  type a = int 
+  type 'x t = 'x list 
+  val beta : 'x t -> (a -> 'x)
+end
 ```
 - Beta can't be implemented for List and Int combination. (When List is empty we can't return a value of type x)
 - So, List functor is not Representable.
