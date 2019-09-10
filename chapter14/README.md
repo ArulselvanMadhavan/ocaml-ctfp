@@ -120,5 +120,17 @@ type 'a stream = | Cons of 'a * 'a stream Lazy.t
 ```
 - Representable functor Instance
 ```ocaml
-
+module StreamRepresentable : Representable = struct
+  type rep = int
+  type 'x t = 'x stream
+  let rec tabulate f = Cons ((f 0), lazy (tabulate (compose f add_one)))
+  let rec index (Cons (b, bs)) n = if n = 0 then b else index (Lazy.force bs) (n - 1)
+end
 ```
+- Single memoization scheme to cover a whole family of functions with arbitrary return types.
+- Representability of contravariant functors 
+- Functor that are based on product types can be represented with sum types.
+- Sum-type functors in general are not representable.
+- Representable functor gives us two different implementations of the same thing - one a function, one a data structure.
+- Two representations are implemented differently and have different perf characteristics.
+- Being able to provide different representation of the same underlying computations is very valuable, in practice.
