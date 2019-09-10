@@ -5,19 +5,21 @@ module type Functor = sig
   type 'a t 
   val fmap : ('a -> 'b) -> 'a t -> 'b t 
 end
-let flip f b a = f a b
-let compose f g x = f (g x)
+
 module type Contravariant = sig
   type 'a t
   val contramap : ('b -> 'a) -> 'a t -> 'b t
 end
+
 module type Profunctor = sig
   type ('a,'b) p
   val dimap : ('a -> 'b) -> ('c -> 'd) -> ('b, 'c) p -> ('a, 'd) p
   val lmap : ('a -> 'b) -> ('b, 'c) p -> ('a, 'c) p
   val rmap : ('b -> 'c) -> ('a, 'b) p -> ('a, 'c) p  
 end
-let add_one x = x + 1
+
+let flip f b a = f a b
+let compose f g x = f (g x)
 ```
 - Set theory - assembly language of mathematics
 - *Set* category of all sets
@@ -53,9 +55,9 @@ end
 ```ocaml
 module ProfunctorArrow : Profunctor = struct
   type ('a, 'b) p = 'a -> 'b
-    let dimap f g p = compose g (compose p f)
-    let lmap f p = (flip compose) f p
-    let rmap = compose
+  let dimap f g p = compose g (compose p f)
+  let lmap f p = (flip compose) f p
+  let rmap = compose
 end
 ```
 - The mapping of objects from any category to hom-sets is functorial.
