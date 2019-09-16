@@ -6,6 +6,7 @@ module type Functor = sig
   val fmap : ('a -> 'b) -> 'a t -> 'b t
 end
 ```
+## Yoneda Lemma
 - Yoneda Lemma is a statement about categories that doesn't have a parallel in other branches of mathematics
 - Arbitrary category C, Functor F from C to Set 
 - Some Set-valued functors are "representable"
@@ -37,7 +38,7 @@ module type NT_AX_FX = sig
 end
 ```
 - Polymorphic function 
-```ocaml
+```OCaml
 val alpha : (a -> 'x) -> 'x t
 ```
 - YL can produce a container of F a when given a polymorphic function `alpha`. (Pseudo OCaml)
