@@ -46,3 +46,8 @@ YE.fromY id (* output type : BtoA.b -> BtoA.a *)
 - YE to preorder category
 - A set with Preorder relation gives rise to a category.
 - hom-set in this category is either an empty set or a one-element set.
+## Naturality
+- YL establishes the isomorphism between the set of NT and an object in Set.
+- Set of NT between any functors is a hom-set in the category [C, Set]
+- [C, Set](C(a,-), F) = Fa
+- Natural isomorphism is an invertible NT between two functors.
