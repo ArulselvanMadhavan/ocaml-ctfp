@@ -9,7 +9,7 @@ Thanks to @mseri for offering to do code review.
 If you find any mistakes or want to improve code snippets, please submit a PR.
 
 ** Completed work:
-- Chapters 1 through 14 are available in the pdf format here: https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201
+- Chapters 1 through 16 are available in the pdf format here: https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201
 
 ** TODO:
 - I am currently using a modified version of `mdx` to move snippets

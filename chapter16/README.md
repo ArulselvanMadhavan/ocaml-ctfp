@@ -34,7 +34,7 @@ module type BtoA = sig
 end
 (* Define the Yoneda embedding *)
 module Yoneda_Embedding(E: BtoA) = struct
-  let fromY : 'x. (E.a -> 'x) -> E.b -> 'x = fun f b -> f (E.btoa b)
+  let fromY : (E.a -> 'x) -> E.b -> 'x = fun f b -> f (E.btoa b)
 end
 ```
 - To recover converter
