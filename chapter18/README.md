@@ -149,8 +149,15 @@ compose snd (factorizer p q) = q
 - Product category
   - C and D
   - C x D - product category - pairs of objects from C and D - pairs of morphisms from C and D
+  - Left aadjoint functor is the diagonal functor
+  - Right adjoint functor is the Product bifunctor
 ```OCaml
 int * bool ~ (int, bool)
 ```
 ## Exponential form Adjunction
-- 
+- Function object a => b
+- g :: z * a -> b ; h :: z -> (a => b)
+- Mapping between hom-sets
+- Two adjoint functors are endofunctors
+- eval function is the counit of this adjunction: (a => b) x a -> b
+- If a functor has an adjoint, then it is unique up to isomorphism
