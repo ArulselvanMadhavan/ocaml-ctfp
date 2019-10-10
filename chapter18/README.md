@@ -40,8 +40,8 @@ let swap (a, b) = (b, a)
 ```ocaml
 module type Unit_Example = sig
   type 'a m
-  val return : 'd -> 'd m
-end;;
+  val return : 'a -> 'A m
+end
 ```
 - extract in OCaml
 ```ocaml
@@ -113,8 +113,8 @@ module Adjunction_From_Hom_Set(A : Adjunction_Hom_Set) : Adjunction = functor(F 
   type 't u = 't U.t
   module M = A(F)(U)
   include M
-  let unit : 'a. 'a -> 'a f u = fun a -> M.left_adjunct idty a
-  let counit : 'a. ('a u) f -> 'a = fun fua -> M.right_adjunct idty fua
+  let unit : 'a -> 'a f u = fun a -> M.left_adjunct idty a
+  let counit : ('a u) f -> 'a = fun fua -> M.right_adjunct idty fua
 end
 
 (* Implementing left and right adjunct from unit/counit Definitions *)
