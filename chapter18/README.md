@@ -12,6 +12,7 @@ module type Representable = sig
   val index : 'x t -> (rep -> 'x)
   val fmap : ('x -> 'y) -> 'x t -> 'y t
 end
+let idty : 'a -> 'a = fun a -> a
 ```
 ## Equality vs Iso
 - Equality is too strong
@@ -85,13 +86,9 @@ module type Adjunction_HomSet = functor (F : Functor)(U : Representable) -> sig
 end
 ```
 - Equivalence between unit/counit and left_adjunct/right_adjunct
-```OCaml
-let unit = left_adjunct id
-let counit = right_adjunct id
-let left_adjunct f a = f
-```
 - Complete Adjunction Definition
 ```ocaml
+(* Putting it all together to show the equivalence between unit/counit and left_adjunct/right_adjunct *)
 module type Adjunction = functor (F : Functor)(U : Representable) -> sig
   val unit : 'a -> ('a F.t) U.t
   val counit : ('a U.t) F.t -> 'a
@@ -99,17 +96,18 @@ module type Adjunction = functor (F : Functor)(U : Representable) -> sig
   val right_adjunct : ('a -> 'b U.t) -> ('a F.t -> 'b)  
 end
 
+(* Adjunction via unit/counit *)
 module type Adjunction_Unit_Counit = functor(F: Functor)(U: Representable) -> sig
   val unit : 'a -> ('a F.t) U.t
   val counit : ('a U.t) F.t -> 'a
 end
-
+(* Adjunction via left and right adjoints *)
 module type Adjunction_Hom_Set = functor (F:Functor)(U:Representable) -> sig
   val left_adjunct : ('a F.t -> 'b) -> 'a -> 'b U.t
   val right_adjunct : ('a -> 'b U.t) -> 'a F.t -> 'b
 end
 
-(* Implementing Adjunction from Hom_Set Definitions *)
+(* Implementing unit/counit from left and right adjoint definitions *)
 module Adjunction_From_Hom_Set(A : Adjunction_Hom_Set) : Adjunction = functor(F : Functor)(U : Representable) -> struct
   type 't f = 't F.t
   type 't u = 't U.t
@@ -119,7 +117,7 @@ module Adjunction_From_Hom_Set(A : Adjunction_Hom_Set) : Adjunction = functor(F 
   let counit : 'a. ('a u) f -> 'a = fun fua -> M.right_adjunct idty fua
 end
 
-(* Implementing Adjunction from unit/counit definitions *)
+(* Implementing left and right adjunct from unit/counit Definitions *)
 module Adjunction_From_Unit_Counit(A:Adjunction_Unit_Counit):Adjunction = functor(F:Functor)(U:Representable) -> struct
   type 't f = 't F.t
   type 't u = 't U.t
