@@ -66,3 +66,68 @@ end
 let tell w = Writer ((), w)
 ```
 ## Fish Anatomy
+- Step 1
+```OCaml
+let (>=>) f g = fun a -> ...
+```
+- Step 2
+```OCaml
+let (>=>) f g = fun a -> 
+  let mb = f a in
+  ...
+```
+- Step 3
+```OCaml
+val (>>=) : 'a m -> ('a -> 'b m) -> 'b m
+```
+- Monad using bind
+```ocaml
+module type Monad_Bind =
+  sig
+    type 'a m
+    val ( >>= ) : 'a m -> ('a -> 'b m) -> 'b m
+    val return : 'a -> 'a m
+  end
+```
+- Writer using bind
+```ocaml
+module WriterMonadBind(W : Monoid) = struct
+  let (>>=) (Writer (a, w)) f = 
+    let Writer (b, w') = f a in
+    Writer (b, W.mappend w w')
+end
+```
+- join in ocaml
+```OCaml
+val join : ('a m) m : 'a m
+```
+- Rewrite bind as
+```ocaml
+module BindUsingFunctionAndJoin(F : Functor) = struct
+  type 'a m = 'a F.t
+  (** Make the type signature of join work and leaving out the implementation *)
+  external join : 'a m m -> 'a m = "%identity"
+  
+  let (>>=) ma f = join (F.fmap f ma)
+end
+```
+- Third option for defining a Monad
+```ocaml
+module type Monad_Join = functor (F : Functor) -> sig
+  type 'a m = 'a F.t
+  val join : 'a m m -> 'a m
+  val return : 'a -> 'a m
+end
+```
+- fmap in terms of bind and return
+```ocaml
+module Fmap_Using_Monad(M : Monad_Bind) = struct
+  let fmap f ma = M.(>>=) ma (fun a -> M.return (f a))
+end
+```
+- join for the Writer monad
+```ocaml
+module Writer_Join(W : Monoid) = struct
+  let join (Writer (Writer (a, w'), w)) = Writer (a, W.mappend w w')
+end
+```
