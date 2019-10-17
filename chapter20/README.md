@@ -10,6 +10,7 @@ end
 ```
 ## Introduction
 ```ocaml
+(* Depends on OCaml library Core *)
 module Vlen(F : Functor with type 'a t = 'a list) = struct
   
   let summable = (module Float:Base__.Container_intf.Summable with type t = float)
