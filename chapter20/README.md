@@ -1,6 +1,7 @@
 # Monads
 ## Utilities used by code below
 ```ocaml
+#require "str"
 let ( <.> ) f g x = f (g x)
 let flip f x y = f y x
 module type Functor = sig
@@ -12,6 +13,7 @@ module type Monoid = sig
   val mempty : a
   val mappend : a -> a -> a
 end
+let up_case = fun s -> Writer(String.uppercase_ascii s, "up_case ")
 ```
 ## Introduction
 ```ocaml
@@ -129,5 +131,79 @@ end
 ```ocaml
 module Writer_Join(W : Monoid) = struct
   let join (Writer (Writer (a, w'), w)) = Writer (a, W.mappend w w')
+end
+```
+## do Notation
+- Writer example
+```ocaml
+(* Import Str module using this - #require "str" *)
+let to_words = fun s -> Writer (Str.split (Str.regexp "\b") s, "to_words")
+
+module Writer_Process(W : Monad with type 'a m = (string, 'a) writer) = struct
+  let process = W.(up_case >=> to_words)
+end
+```
+- OCaml do Notation
+```ocaml
+module Process_Do(W : Monad_Bind with type 'a m = (string, 'a) writer) = struct
+  (* Needs OCaml compiler > 4.08.1 *)
+  let (let*) = W.(>>=)
+  
+  let process s = 
+    let* up_str = up_case s in
+    to_words up_str
+end
+```
+- Upcase 
+```ocaml
+let up_case = fun s -> Writer(String.uppercase_ascii s, "up_case ")
+```
+- Do block is 
+```ocaml
+module Process_Bind_Without_Do(W : Monad_Bind with type 'a m = (string, 'a) writer) = struct
+  let process s = W.(up_case s >>= (fun up_str -> to_words up_str))
+end
+```
+- Up Case
+```OCaml
+let* up_str <- up_case s
+```
+- Using teller towords
+```ocaml
+ module Process_Tell(W : Monad_Bind with type 'a m = (string, 'a) writer) = struct
+  (* Needs OCaml compiler > 4.08.1 *)
+  let (let*) = W.(>>=)
+
+  let tell w = Writer ((), w)
+
+  let process s = 
+    let* up_str = up_case s in
+    let* _ = tell "to_words " in
+    to_words up_str
+end;;
+```
+- With bind
+```ocaml
+ module Process_Bind_Without_Do(W : Monad_Bind with type 'a m = (string, 'a) writer) = struct
+  let tell w = Writer((), w)  
+  let process s = W.(up_case s >>= (fun up_str -> 
+      tell "to_words" >>= (fun _ -> 
+      to_words up_str)))
+end;;
+```
+- Special operator (>>)
+```ocaml
+module Monad_Ops(M : Monad_Bind) = struct
+  let (>>) m k = M.(m >>= (fun _ -> k))
+end
+```
+- Process with special ops
+```ocaml
+module Process_Bind_Without_Do(W : Monad_Bind with type 'a m = (string, 'a) writer) = struct
+  open Monad_Ops(W)
+  let tell w = Writer((), w)  
+  let process s = W.(up_case s >>= (fun up_str -> 
+      tell "to_words" >> 
+      to_words up_str))
 end
 ```
