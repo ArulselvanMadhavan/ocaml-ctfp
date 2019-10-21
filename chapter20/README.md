@@ -20,7 +20,9 @@ let up_case = fun s -> Writer(String.uppercase_ascii s, "up_case ")
 (* Depends on OCaml library Base - #require "base" *)
 module Vlen(F : Functor with type 'a t = 'a list) = struct
   
-  let summable = (module Float:Base.Container_intf.Summable with type t = float)
+  open Base
+  
+  let summable = (module Float:Base__.Container_intf.Summable with type t = float)
   
   let vlen = Float.sqrt <.> (List.sum summable ~f:Fn.id) <.> (F.fmap (flip Float.int_pow 2))
 end
@@ -138,8 +140,8 @@ end
 ## do Notation
 - Writer example
 ```ocaml
-(* Import Str module using this - #require "str" *)
-let to_words = fun s -> Writer (Str.split (Str.regexp "\b") s, "to_words")
+(* Using split_on_char to avoid having to use external regex libraries *)
+let to_words = fun s -> Writer (String.split_on_char ' ' s, "to_words")
 
 module Writer_Process(W : Monad with type 'a m = (string, 'a) writer) =
 struct
