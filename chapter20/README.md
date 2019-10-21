@@ -13,14 +13,14 @@ module type Monoid = sig
   val mempty : a
   val mappend : a -> a -> a
 end
-let up_case = fun s -> Writer(String.uppercase s, "up_case ")
+let up_case = fun s -> Writer(String.uppercase_ascii s, "up_case ")
 ```
 ## Introduction
 ```ocaml
-(* Depends on OCaml library Core *)
+(* Depends on OCaml library Base - #require "base" *)
 module Vlen(F : Functor with type 'a t = 'a list) = struct
   
-  let summable = (module Float:Base__.Container_intf.Summable with type t = float)
+  let summable = (module Float:Base.Container_intf.Summable with type t = float)
   
   let vlen = Float.sqrt <.> (List.sum summable ~f:Fn.id) <.> (F.fmap (flip Float.int_pow 2))
 end
@@ -52,7 +52,7 @@ module type Monad =
 - Monad is a way of composing embellished functions
 - Monad Instance for Writer
 ```ocaml
-module WriterMonad(W : Monoid):Monad with type 'a m = (W.a, 'a) writer = struct
+module WriterMonad(W : Monoid): Monad with type 'a m = (W.a, 'a) writer = struct
   type 'a m = (W.a, 'a) writer
 
   let (>=>) f g = fun a ->
@@ -101,7 +101,7 @@ end
 ```
 - join in ocaml
 ```OCaml
-val join : ('a m) m : 'a m
+val join : ('a m) m -> 'a m
 ```
 - Rewrite bind as
 ```ocaml
@@ -109,7 +109,7 @@ module BindUsingFunctionAndJoin(F : Functor) = struct
   type 'a m = 'a F.t
   
   (** Make the type signature of join work 
-  without providing an implementation **)
+  without providing an implementation. **)
   external join : 'a m m -> 'a m = "%identity"
   
   let (>>=) ma f = join (F.fmap f ma)
