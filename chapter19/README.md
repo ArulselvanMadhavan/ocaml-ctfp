@@ -1,6 +1,6 @@
 # Free/Forgetful Adjunctions
 ## Utilities used by code below
-## INtroduction
+## Introduction
 - A free functor is the left adjoint of a forgetful functor
 - Forgetful functor - that forgets some structure
 - A functor mapping from C to Set.
@@ -15,7 +15,8 @@
 - 'a list is a free monoid where 'a represents the set of generators
 - Appending is associative and unital
 ```ocaml
-type string = char list
+(* OCaml's string type is an immutable array of bytes *)
+type string' = char list
 ```
 - Isomorphism with list of units
 ```ocaml
