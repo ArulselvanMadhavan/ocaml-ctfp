@@ -108,8 +108,11 @@ val join : ('a m) m -> 'a m
 module BindUsingFunctionAndJoin(F : Functor) = struct
   type 'a m = 'a F.t
   
-  (** Make the type signature of join work 
-  without providing an implementation. **)
+  (** Warning: The use of a compiler directive "%identity"
+  here is only to make the type signature of
+  join work without providing an implementation.
+  This is only for the sake of the example and
+  should **never** be relied upon. **)
   external join : 'a m m -> 'a m = "%identity"
   
   let (>>=) ma f = join (F.fmap f ma)
@@ -138,7 +141,9 @@ end
 ## do Notation
 - Writer example
 ```ocaml
-(* Import Str module using this - #require "str" *)
+(* Import Str module using `#require "str"`.
+   Note that the Str module is going to be deprecated in favour of
+   external libraries like `re` or `tyre`. *)
 let to_words = fun s -> Writer (Str.split (Str.regexp "\b") s, "to_words")
 
 module Writer_Process(W : Monad with type 'a m = (string, 'a) writer) =
@@ -161,7 +166,7 @@ end
 ```
 - Upcase 
 ```ocaml
-let up_case = fun s -> Writer(String.uppercase s, "up_case ")
+let up_case = fun s -> Writer(String.uppercase_ascii s, "up_case ")
 ```
 - Do block is 
 ```ocaml
