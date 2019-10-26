@@ -141,10 +141,7 @@ end
 ## do Notation
 - Writer example
 ```ocaml
-(* Import Str module using `#require "str"`.
-   Note that the Str module is going to be deprecated in favour of
-   external libraries like `re` or `tyre`. *)
-let to_words = fun s -> Writer (Str.split (Str.regexp "\b") s, "to_words")
+let to_words = fun s -> Writer (String.split_on_char ' ' s, "to_words")
 
 module Writer_Process(W : Monad with type 'a m = (string, 'a) writer) =
 struct
