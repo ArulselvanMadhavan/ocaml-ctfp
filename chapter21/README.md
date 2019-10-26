@@ -69,3 +69,43 @@ module Pythagorean = struct
     Gen.return (x, y, z) else Gen.empty
 end
 ```
+### Reader
+- Reader type
+```ocaml
+type ('e, 'a) reader = Reader of ('e -> 'a)
+```
+- run_reader
+```ocaml
+let run_reader (Reader f) e = f e
+```
+- Bind implementation for reader
+```OCaml
+let (>>=) ra k = Reader (fun e -> ...)
+```
+```OCaml
+let (>>=) ra k = Reader (fun e -> 
+  let a = run_reader ra e in
+  ...)
+```
+```OCaml
+let (>>=) ra k = Reader (fun e ->
+  let a = run_reader ra e in
+  let rb = k a in
+  ...)
+```
+```ocaml
+let (>>=) ra k = Reader (fun e ->
+  let a = run_reader ra e in
+  let rb = k a in
+  run_reader rb e)
+```
+```ocaml
+module ReaderMonad(T : sig type t end) : Monad_Bind = struct
+  type 'a m = (T.t, 'a) reader
+  let return a = Reader (fun e -> a)
+  let (>>=) ra k = Reader (fun e ->
+  let a = run_reader ra e in
+  let rb = k a in
+  run_reader rb e)
+end
+```
