@@ -6,6 +6,17 @@ module type Monad_Join =  sig
   val join : 'a m m -> 'a m
   val return : 'a -> 'a m
 end
+module type Monad_Bind =
+  sig
+    type 'a m
+    val ( >>= ) : 'a m -> ('a -> 'b m) -> 'b m
+    val return : 'a -> 'a m
+  end
+module type Monoid = sig
+  type a
+  val mempty : a
+  val mappend : a -> a -> a
+end  
 ```
 ## Introduction
 - Partiality - may not terminate
@@ -103,9 +114,70 @@ let (>>=) ra k = Reader (fun e ->
 module ReaderMonad(T : sig type t end) : Monad_Bind = struct
   type 'a m = (T.t, 'a) reader
   let return a = Reader (fun e -> a)
-  let (>>=) ra k = Reader (fun e ->
-  let a = run_reader ra e in
-  let rb = k a in
-  run_reader rb e)
+  let (>>=) ra k = Reader (fun e -> run_reader (k (run_reader ra e)) e)
 end
 ```
+### Write Only State
+```ocaml
+type ('w, 'a) writer = Writer of ('a * 'w);;
+```
+```ocaml
+let run_writer (Writer (a, w)) = (a, w)
+```
+- Writer Instance
+```ocaml
+module WriterMonad(W : Monoid):Monad_Bind = struct
+  type 'a m = (W.t, 'a) writer
+  
+  let return a = Writer (a, W.mempty)
+  
+  let (>>=) (Writer (a, w)) k = 
+    let (a', w') = run_writer (k a) in
+    Writer (a', W.mappend w w')
+end
+```
+### State
+- Combines Reader and Writer
+```ocaml
+type ('s, 'a) state = State of ('s -> ('a * 's))
+```
+- runstate
+```ocaml
+let run_state (State f) s = f s;;
+```
+- bind
+```ocaml
+let (>>=) sa k = State (fun s -> 
+  let (a, s') = run_state sa s in
+  let sb = k a in
+  run_state sb s')
+```
+- Monad Instance
+```ocaml
+module State_Monad(S : sig type t end) : Monad_Bind = struct
+  
+  type 'a m = (S.t, 'a) state
+
+  let (>>=) sa k = State (fun s -> 
+    let (a, s') = run_state sa s in
+    let sb = k a in
+    run_state sb s')
+
+  let return a = State (fun s -> (a, s))
+end
+```
+### Exceptions
+- Partial functions(throws exceptions) can be converted to total functions
+- Ex: Maybe, Either
+```ocaml
+module OptionMonad : Monad_Bind = struct
+  type 'a m = 'a option
+
+  let (>>=) = function
+    | Some a -> fun k -> k a
+    | None   -> fun _ -> None
+ 
+  let return a = Some a
+end
+```
+### Continuations
