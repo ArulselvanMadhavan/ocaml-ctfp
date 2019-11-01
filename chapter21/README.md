@@ -181,3 +181,41 @@ module OptionMonad : Monad_Bind = struct
 end
 ```
 ### Continuations
+- Continuation type
+```ocaml
+type ('r, 'a) cont = Cont of (('a -> 'r) -> 'r);;
+```
+- runCont
+```ocaml
+let run_cont (Cont k) h = k h
+```
+- bind for Cont Monad
+```OCaml
+val (>>=) : (('a -> 'r) -> 'r) -> ('a -> (('b -> 'r) -> 'r)) -> (('b -> 'r) -> 'r)
+```
+- Step1
+```OCaml
+let (>>=) ka kab = Cont (fun hb -> ...)
+```
+- Step2
+```OCaml
+run_cont ka (fun a -> ...)
+```
+- Step3
+```OCaml
+run_cont ka (fun a ->
+  let kb = kab a in
+  run_cont kb hb)
+```
+- Monad Instance
+```ocaml
+module Cont_Monad(R:sig type t end) : Monad_Bind = struct
+  type 'a m = (R.t, 'a) cont
+
+  let return a = Cont (fun ha -> ha a)
+
+  let (>>=) ka kab = Cont (fun hb ->
+    run_cont ka (fun a ->
+    run_cont (kab a) hb))
+end
+```

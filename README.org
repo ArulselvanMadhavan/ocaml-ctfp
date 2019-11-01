@@ -16,4 +16,9 @@ If you find any mistakes or want to improve code snippets, please submit a PR.
   from this repo to the book repo -
   https://github.com/ArulselvanMadhavan/milewski-ctfp-pdf/tree/ocaml .
   Need to automate this and make it part of makefile
-- Need help in resolving merge conflicts in the PR - https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201
+  - Clone this repo
+  - Run the modified version of mdx to generate the snippets?(Or Check
+    in the snippets in this repo?) in each chapter
+  - Run ocamlformat
+  - Copy the snippets to the folders where the pdf generator looks for it.
+  - When the pdf is generated, remove the snippets
