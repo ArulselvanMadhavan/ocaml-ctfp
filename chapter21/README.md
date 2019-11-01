@@ -13,10 +13,12 @@ module type Monad_Bind =
     val return : 'a -> 'a m
   end
 module type Monoid = sig
-  type a
-  val mempty : a
-  val mappend : a -> a -> a
-end  
+  type t
+  val mempty : t
+  val mappend : t -> t -> t
+end
+type 'a io = IO of (unit -> 'a)
+let put_str s = IO (fun () -> print_string s)
 ```
 ## Introduction
 - Partiality - may not terminate
@@ -143,7 +145,7 @@ type ('s, 'a) state = State of ('s -> ('a * 's))
 ```
 - runstate
 ```ocaml
-let run_state (State f) s = f s;;
+let run_state (State f) s = f s
 ```
 - bind
 ```ocaml
@@ -165,6 +167,12 @@ module State_Monad(S : sig type t end) : Monad_Bind = struct
 
   let return a = State (fun s -> (a, s))
 end
+```
+```ocaml
+let get = State (fun s -> (s, s))
+```
+```ocaml
+let put s' = State (fun s -> ((), s'))
 ```
 ### Exceptions
 - Partial functions(throws exceptions) can be converted to total functions
