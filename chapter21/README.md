@@ -219,3 +219,57 @@ module Cont_Monad(R:sig type t end) : Monad_Bind = struct
     run_cont (kab a) hb))
 end
 ```
+### Interactive Input
+```ocaml
+module type Terminal_IO = sig
+  (* OCaml doesn't have a built-in IO type*)
+  type 'a io = IO of (unit -> 'a)
+  
+  val get_char : unit -> char io
+end
+```
+- main 
+```OCaml
+val main : unit io
+```
+- As Kleisli arrow
+```OCaml
+val main : unit -> unit io
+```
+- IO as a State monad with RealWorld type
+```OCaml
+type 'a io = realworld -> ('a * realworld)
+```
+```OCaml
+type 'a io = realworld state
+```
+### Interactive output
+```OCaml
+val put_str : string -> unit io
+```
+```OCaml
+val put_str : string -> unit
+```
+- Main function of type unit io 
+```ocaml
+(* Monad implementation for type io *)
+module IOMonad:Monad_Bind with type 'a m = 'a io = struct
+    type 'a m = 'a io
+    let return x = IO (fun () -> x)
+    let (>>=) m f = IO (fun () -> 
+        let (IO m') = m in 
+        let (IO m'') = f (m' ()) in 
+        m'' ()
+    )
+end
+
+(* main *)
+module IO_Main = struct
+
+  let (let*) = IOMonad.(>>=)
+  
+  let main = 
+    let* _ = put_str "Hello" in
+    put_str "world!"
+end
+```
