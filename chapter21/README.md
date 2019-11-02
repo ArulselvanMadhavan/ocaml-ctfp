@@ -3,6 +3,10 @@
 ```ocaml
 let flip f x y = f y x
 let compose f g x = f (g x)
+module type Functor = sig
+  type 'a t
+  val fmap : ('a -> 'b) -> 'a t -> 'b t
+end
 module type MonadJoin = sig
   type 'a t
   include Functor with type 'a t := 'a t
@@ -33,15 +37,19 @@ let put_str s = IO (fun () -> print_string s)
 - Interactive output
 ## Partiality
 ```ocaml
-module ListMonad = (functor (F : Functor with type 'a t = 'a list) -> (struct
+module ListMonad = functor (F : Functor with type 'a t = 'a list) -> (struct
   include F
   type 'a t = 'a F.t
   let join = List.concat
   let return a = [a]
-end) : MonadJoin);;
+end : MonadJoin)
 ```
 - Bind using join and fmap
 ```ocaml
+module ListFunctor : Functor with type 'a t = 'a list = struct
+  type 'a t = 'a list
+  let fmap = List.map
+end
 module L = ListMonad(ListFunctor)
 let ( >>= ) xs k = L.(compose join (fmap k) xs)
 ```
