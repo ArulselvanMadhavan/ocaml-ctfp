@@ -1,6 +1,7 @@
 # Monads and Effects
 ## Utilities used by code below
 ```ocaml
+let flip f x y = f y x
 module type Monad_Join =  sig
   type 'a m
   val join : 'a m m -> 'a m
@@ -38,13 +39,17 @@ end
 ```
 - Bind using join and fmap
 ```ocaml
-let ( >>= ) xs k = List.concat (List.map k xs)
+let ( >>= ) xs k = List_Monad.join (List.map k xs)
 ```
 - Triples in OCaml
 ```ocaml
+(* This requires the "gen" library,
+   after having installed them, execute
+   #require "gen";; *)
+
 module Pythagorean = struct
 
-  let (let*) = Fn.flip Gen.flat_map
+  let (let*) = flip Gen.flat_map
 
   let (let+) x f = Gen.map f x
 
@@ -61,14 +66,18 @@ end
 - guard for List
 ```ocaml
 let guard = function
-  true -> [()]
+  | true -> [()]
   | false -> []
 ```
 - Triples alternate
 ```ocaml
+(* This requires the "gen" library,
+   after having installed them, execute
+   #require "gen";; *)
+
 module Pythagorean = struct
 
-  let (let*) = Fn.flip Gen.flat_map
+  let (let*) = flip Gen.flat_map
 
   let (let+) x f = Gen.map f x
 
