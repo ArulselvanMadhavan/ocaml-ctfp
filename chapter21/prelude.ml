@@ -1,4 +1,4 @@
-#require "core,core.top,gen";;
+#require "base,gen";;
 
 open Base
 

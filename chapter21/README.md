@@ -2,10 +2,12 @@
 ## Utilities used by code below
 ```ocaml
 let flip f x y = f y x
-module type MonadJoin =  sig
-  type 'a m
-  val join : 'a m m -> 'a m
-  val return : 'a -> 'a m
+let compose f g x = f (g x)
+module type MonadJoin = sig
+  type 'a t
+  include Functor with type 'a t := 'a t
+  val join : 'a t t -> 'a t
+  val return : 'a -> 'a t
 end
 module type MonadBind =
   sig
@@ -31,15 +33,17 @@ let put_str s = IO (fun () -> print_string s)
 - Interactive output
 ## Partiality
 ```ocaml
-module ListMonad : MonadJoin = struct
-  type 'a m = 'a list
+module ListMonad = (functor (F : Functor with type 'a t = 'a list) -> (struct
+  include F
+  type 'a t = 'a F.t
   let join = List.concat
   let return a = [a]
-end
+end) : MonadJoin);;
 ```
 - Bind using join and fmap
 ```ocaml
-let ( >>= ) xs k = ListMonad.join (List.map k xs)
+module L = ListMonad(ListFunctor)
+let ( >>= ) xs k = L.(compose join (fmap k) xs)
 ```
 - Triples in OCaml
 ```ocaml
