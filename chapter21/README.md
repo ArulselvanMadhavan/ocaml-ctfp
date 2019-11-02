@@ -2,12 +2,18 @@
 ## Utilities used by code below
 ```ocaml
 let flip f x y = f y x
-module type Monad_Join =  sig
-  type 'a m
-  val join : 'a m m -> 'a m
-  val return : 'a -> 'a m
+let compose f g x = f (g x)
+module type Functor = sig
+  type 'a t
+  val fmap : ('a -> 'b) -> 'a t -> 'b t
 end
-module type Monad_Bind =
+module type MonadJoin = sig
+  type 'a t
+  include Functor with type 'a t := 'a t
+  val join : 'a t t -> 'a t
+  val return : 'a -> 'a t
+end
+module type MonadBind =
   sig
     type 'a m
     val ( >>= ) : 'a m -> ('a -> 'b m) -> 'b m
@@ -31,15 +37,21 @@ let put_str s = IO (fun () -> print_string s)
 - Interactive output
 ## Partiality
 ```ocaml
-module List_Monad : Monad_Join = struct
-  type 'a m = 'a list
+module ListMonad = functor (F : Functor with type 'a t = 'a list) -> (struct
+  include F
+  type 'a t = 'a F.t
   let join = List.concat
   let return a = [a]
-end
+end : MonadJoin)
 ```
 - Bind using join and fmap
 ```ocaml
-let ( >>= ) xs k = List_Monad.join (List.map k xs)
+module ListFunctor : Functor with type 'a t = 'a list = struct
+  type 'a t = 'a list
+  let fmap = List.map
+end
+module L = ListMonad(ListFunctor)
+let ( >>= ) xs k = L.(compose join (fmap k) xs)
 ```
 - Triples in OCaml
 ```ocaml
@@ -122,7 +134,7 @@ let (>>=) ra k = Reader (fun e ->
   run_reader rb e)
 ```
 ```ocaml
-module ReaderMonad(T : sig type t end) : Monad_Bind = struct
+module ReaderMonad(T : sig type t end) : MonadBind = struct
   type 'a m = (T.t, 'a) reader
   let return a = Reader (fun e -> a)
   let (>>=) ra k = Reader (fun e -> run_reader (k (run_reader ra e)) e)
@@ -137,7 +149,7 @@ let run_writer (Writer (a, w)) = (a, w)
 ```
 - Writer Instance
 ```ocaml
-module WriterMonad(W : Monoid):Monad_Bind = struct
+module WriterMonad(W : Monoid):MonadBind = struct
   type 'a m = (W.t, 'a) writer
   
   let return a = Writer (a, W.mempty)
@@ -165,7 +177,7 @@ let (>>=) sa k = State (fun s ->
 ```
 - Monad Instance
 ```ocaml
-module State_Monad(S : sig type t end) : Monad_Bind = struct
+module StateMonad(S : sig type t end) : MonadBind = struct
   
   type 'a m = (S.t, 'a) state
 
@@ -187,7 +199,7 @@ let put s' = State (fun s -> ((), s'))
 - Partial functions(throws exceptions) can be converted to total functions
 - Ex: Maybe, Either
 ```ocaml
-module OptionMonad : Monad_Bind = struct
+module OptionMonad : MonadBind = struct
   type 'a m = 'a option
 
   let (>>=) = function
@@ -226,7 +238,7 @@ run_cont ka (fun a ->
 ```
 - Monad Instance
 ```ocaml
-module Cont_Monad(R:sig type t end) : Monad_Bind = struct
+module ContMonad(R:sig type t end) : MonadBind = struct
   type 'a m = (R.t, 'a) cont
 
   let return a = Cont (fun ha -> ha a)
@@ -238,7 +250,7 @@ end
 ```
 ### Interactive Input
 ```ocaml
-module type Terminal_IO = sig
+module type TerminalIO = sig
   (* OCaml doesn't have a built-in IO type*)
   type 'a io = IO of (unit -> 'a)
   
@@ -270,7 +282,7 @@ val put_str : string -> unit
 - Main function of type unit io 
 ```ocaml
 (* Monad implementation for type io *)
-module IOMonad:Monad_Bind with type 'a m = 'a io = struct
+module IOMonad:MonadBind with type 'a m = 'a io = struct
     type 'a m = 'a io
     let return x = IO (fun () -> x)
     let (>>=) m f = IO (fun () -> 
@@ -281,7 +293,7 @@ module IOMonad:Monad_Bind with type 'a m = 'a io = struct
 end
 
 (* main *)
-module IO_Main = struct
+module IOMain = struct
 
   let (let*) = IOMonad.(>>=)
   
