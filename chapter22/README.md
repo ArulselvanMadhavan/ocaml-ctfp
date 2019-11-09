@@ -63,4 +63,52 @@ val eta : unit -> m
 ```OCaml
 mu (x, mu(y, z)) = mu (mu (x, y), z)
 ```
-- (mu . bimap id mu)
+- Towards point-free
+  - LHS
+```OCaml
+(compose mu (bimap id mu))(x, (y, z))
+```
+  - RHS
+  ```OCaml
+  (compose mu (bimap mu id))((x, y), z)
+  ```
+- We want to be able to express function equality in point-free notation like this, but it isn't possible just yet
+```OCaml
+compose mu (bimap id mu) = compose mu (bimap mu id)
+```
+- Associator - establish Isomorphism between two pairs
+```ocaml
+let alpha ((x, y), z) = (x, (y, z))
+```
+- With the help of the associator, we can write this point-free
+```OCaml
+compose mu (compose (bimap id mu) alpha) = compose mu (bimap mu id)
+```
+- Moving unit laws to point-free notation. This is the unit law without point-free
+```OCaml
+mu (eta (), x) = x
+mu (x, eta ()) = x
+```
+- Using bimap
+```OCaml
+(compose mu (bimap eta id))((), x) = lambda((), x)
+(compose mu (bimap id eta))(x, ()) = rho(x, ())
+```
+- lambda - left unitor and rho - right unitor
+```ocaml
+let lambda ((), x) = x
+```
+```ocaml
+let rho (x, ()) = x
+```
+- Point free versions
+```OCaml
+mu . bimap id eta = rho
+mu . bimap eta id = lambda
+```
+- Associativity and unit laws for cartesian product are only valid upto isomorphism.
+- A monoidal category is a category C equipped with a bifunctor called the tensor product `tensor :: C x C -> C` and a distinct object i called the unit object together with three natural isomorphisms - associator, left and right unitors
+alpha_{abc} :: (a `tensor` b) `tensor` c -> a `tensor` (b `tensor` c)
+lambdaₐ :: i `tensor` a -> a
+rhoₐ :: a `tensor` i -> a
+
