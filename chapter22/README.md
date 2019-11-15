@@ -1,6 +1,17 @@
 # Monads Categorically
 ## Utilities used by code below
 ```ocaml
+module type Functor = sig
+  type 'a t
+  val fmap : ('a -> 'b) -> 'a t -> 'b t
+end
+module type Representable = sig
+  type rep (* Representing type 'a' *)
+  type 'a t
+  include Functor with type 'a t := 'a t
+  val tabulate : (rep -> 'a) -> 'a t
+  val index : 'a t -> (rep -> 'a)
+end
 module type MonadJoin = sig
   type 'a t
   include Functor with type 'a t := 'a t
@@ -111,4 +122,28 @@ mu . bimap eta id = lambda
 alpha_{abc} :: (a `tensor` b) `tensor` c -> a `tensor` (b `tensor` c)
 lambdaₐ :: i `tensor` a -> a
 rhoₐ :: a `tensor` i -> a
+### Monoid in a Monoidal Category
+- Define monoid in monoidal category
+- object m
+- Use tensor product to form higher powers of m
+- To form a monoid:
+  - U :: m `tensor` m
+  - N :: i -> m
+- tensor product has to be a bifunctor
+### Monads as Monoids
+- Monads are just monoids in the category of endofunctors
+### Monads from Adjunctions
+- Adjunction is a pair of functors going back and forth between C and D
+- Endofunctors : compose R L and compose L R
+- L z = z x s
+- R b = s => b
+```ocaml
+type ('s, 'a) state = State of ('s -> 'a * 's)
+```
+```ocaml
+type ('s, 'a) prod = Prod of 'a * 's
+```
+```ocaml
+type ('s, 'a) reader = Reader of 's -> 'a
+```
 
