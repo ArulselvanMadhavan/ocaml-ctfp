@@ -96,14 +96,17 @@ module type ComonadBase = sig
   include Functor with type 'a t = 'a w
   val extract : ('a w -> 'b) -> 'a w -> 'b w
 end
+
 module type ComonadDuplicate = sig
   type 'a w
   val duplicate : 'a w -> 'a w w
 end
+
 module type ComonadExtend = sig
   type 'a w
   val extend : ('a w -> 'b) -> 'a w -> 'b w
 end
+
 module type Comonad = sig
   type 'a w
   include ComonadBase with type 'a w := 'a w
