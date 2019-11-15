@@ -111,10 +111,13 @@ module type Comonad = sig
   include ComonadDuplicate with type 'a w := 'a w
 end
 
-(* TODO: Recursive modules *)
-module ComonadImpl(W : sig type 'a w end)(C : ComonadBase with type 'a w = 'a W.w)(E : ComonadExtend with type 'a w = 'a W.w)(D : ComonadDuplicate with type 'a w = 'a W.w) : Comonad = struct
+module rec ComonadImplViaExtend: functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> Comonad = functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> struct
   include C
-  let duplicate : 'a w -> 'a w w = fun wa ->E.extend id wa
-  let extend f = compose (C.fmap f) D.duplicate
-end
+  include D
+  let extend f wa = (C.fmap f) (D.duplicate wa)
+end and ComonadImplViaDuplicate: functor (C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> Comonad = functor(C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> struct
+  include C
+  include E
+  let duplicate (wa : 'a w):'a w w = E.extend id wa
+end;;
 ```
