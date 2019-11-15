@@ -6,6 +6,7 @@ module type Functor = sig
   val fmap : ('a -> 'b) -> 'a t -> 'b t
 end
 let id a = a
+let compose f g x = f (g x)
 ```
 - Monad - composing kleisli arrows
 ```OCaml
@@ -110,11 +111,10 @@ module type Comonad = sig
   include ComonadDuplicate with type 'a w := 'a w
 end
 
-(* Recursive module definition *)
-module ComonadImpl(W : sig type 'a w end)(C : ComonadBase with type 'a w = 'a W.w)(E : ComonadExtend with type 'a w = 'a W.w)(D : ComonadDuplicate with type 'a w = 'a D.w) : Comonad = struct
-  type 'a w = 'a W.w
+(* TODO: Recursive modules *)
+module ComonadImpl(W : sig type 'a w end)(C : ComonadBase with type 'a w = 'a W.w)(E : ComonadExtend with type 'a w = 'a W.w)(D : ComonadDuplicate with type 'a w = 'a W.w) : Comonad = struct
   include C
-  let duplicate = E.extend Fn.id
+  let duplicate : 'a w -> 'a w w = fun wa ->E.extend id wa
   let extend f = compose (C.fmap f) D.duplicate
-end;;
+end
 ```
