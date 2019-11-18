@@ -29,6 +29,7 @@ end
 let (<.>) f g x = f (g x)
 let uncurry f (a, b) = f a b
 ```
+## Introduction
 - In CT, a monad is an endofunctor T equipped with a pair of natural transformations mu and eta
 - mu is the NT from the square functor to T
 - mu :: T² -> T
@@ -90,9 +91,9 @@ mu (x, mu(y, z)) = mu (mu (x, y), z)
 (compose mu (bimap id mu))(x, (y, z))
 ```
   - RHS
-  ```OCaml
-  (compose mu (bimap mu id))((x, y), z)
-  ```
+```OCaml
+(compose mu (bimap mu id))((x, y), z)
+```
 - We want to be able to express function equality in point-free notation like this, but it isn't possible just yet
 ```OCaml
 compose mu (bimap id mu) = compose mu (bimap mu id)
@@ -157,7 +158,7 @@ type ('s, 'a) prod = Prod of 'a * 's
 type ('s, 'a) reader = Reader of ('s -> 'a)
 ```
 ```ocaml
-module AdjunctionState(S:sig type s end)(F:Functor with type 'a t = (S.s, 'a) prod)(R:Representable with type 'a t = (S.s, 'a) reader):Adjunction with type 'a f = (S.s, 'a) prod and type 'a r = (S.s, 'a) reader = struct
+module AdjunctionState(S:sig type s end)(F:Functor with type 'a t = (S.s, 'a) prod)(R:Representable with type 'a t = (S.s, 'a) reader):Adjunction = struct
   type 'a f = (S.s, 'a) prod
   type 'a r = (S.s, 'a) reader
   include F
