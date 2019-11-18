@@ -18,6 +18,16 @@ module type MonadJoin = sig
   val join : 'a t t -> 'a t
   val return : 'a -> 'a t
 end
+module type Adjunction = sig
+  type 'a f
+  type 'a r
+  include Functor with type 'a t = 'a f
+  include Representable with type 'a t = 'a r
+  val unit : 'a -> 'a f r
+  val counit : 'a r f -> 'a
+end
+let (<.>) f g x = f (g x)
+let uncurry f (a, b) = f a b
 ```
 - In CT, a monad is an endofunctor T equipped with a pair of natural transformations mu and eta
 - mu is the NT from the square functor to T
@@ -144,6 +154,34 @@ type ('s, 'a) state = State of ('s -> 'a * 's)
 type ('s, 'a) prod = Prod of 'a * 's
 ```
 ```ocaml
-type ('s, 'a) reader = Reader of 's -> 'a
+type ('s, 'a) reader = Reader of ('s -> 'a)
 ```
-
+```ocaml
+module AdjunctionState(S:sig type s end)(F:Functor with type 'a t = (S.s, 'a) prod)(R:Representable with type 'a t = (S.s, 'a) reader):Adjunction with type 'a f = (S.s, 'a) prod and type 'a r = (S.s, 'a) reader = struct
+  type 'a f = (S.s, 'a) prod
+  type 'a r = (S.s, 'a) reader
+  include F
+  include R
+  let unit a = Reader (fun s -> Prod (a, s))
+  let counit (Prod (Reader f, s)) = f s
+end
+```
+- Composition of reader after product is the state functor
+```ocaml
+type ('s, 'a) state = State of ('s -> 'a * 's)
+```
+- Run_state
+```ocaml
+let run_state (State f) s = f s
+```
+- Definiing join
+```OCaml
+val ssa : ('s, ('s, 'a) state) state
+val run_state ssa : 's -> (('s, 'a) state, 's)
+```
+- join
+```ocaml
+let join : ('s, ('s, 'a) state) state -> ('s, 'a) state = fun ssa ->
+  State (uncurry run_state <.> run_state ssa)
+```
+- Not every adjunction gives rise to a monad but every monad can be factorized into a composition of two adjoint functors
