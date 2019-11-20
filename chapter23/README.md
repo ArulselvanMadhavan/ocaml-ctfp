@@ -8,6 +8,7 @@ end
 let id a = a
 let compose f g x = f (g x)
 ```
+## Introduction
 - Monad - composing kleisli arrows
 ```OCaml
 'a -> 'b m
@@ -94,7 +95,7 @@ val duplicate : 'a w -> 'a w w
 module type ComonadBase = sig
   type 'a w
   include Functor with type 'a t = 'a w
-  val extract : ('a w -> 'b) -> 'a w -> 'b w
+  val extract : 'a w -> 'a
 end
 
 module type ComonadDuplicate = sig
@@ -114,13 +115,69 @@ module type Comonad = sig
   include ComonadDuplicate with type 'a w := 'a w
 end
 
-module rec ComonadImplViaExtend: functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> Comonad = functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> struct
+(* Construct a full comonad instance using one of the following modules *)
+module rec ComonadImplViaExtend: functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> struct
   include C
   include D
   let extend f wa = (C.fmap f) (D.duplicate wa)
-end and ComonadImplViaDuplicate: functor (C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> Comonad = functor(C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> struct
+end and ComonadImplViaDuplicate: functor (C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> struct
   include C
   include E
   let duplicate (wa : 'a w):'a w w = E.extend id wa
-end;;
+end
+```
+### Stream comonad
+```ocaml
+type 'a stream = Cons of 'a * 'a stream Lazy.t;;
+```
+- Functor instance
+```ocaml
+module StreamFunctor : Functor with type 'a t = 'a stream = struct
+  type 'a t = 'a stream
+  let rec fmap f = function
+    | Cons (x, xs) -> Cons (f x, Lazy.from_val (fmap f (Lazy.force xs)))
+end
+```
+- Get the first element of stream - extract
+```ocaml
+let extract (Cons (x, _)) = x
+```
+- Duplicate produces stream of streams
+```ocaml
+let rec duplicate (Cons (x, xs)) = Cons (Cons (x, xs), Lazy.from_val (duplicate (Lazy.force xs)))
+```
+- Complete comonad instance
+```ocaml
+(* Implement Extract *)
+module StreamComonadBase(F:Functor with type 'a t = 'a stream):ComonadBase with type 'a w = 'a stream = struct
+  type 'a w = 'a stream
+  include F
+  let extract (Cons (x, _)) = x
+end
+
+(* Implement duplicate *)
+module StreamComonadDuplicate : ComonadDuplicate with type 'a w = 'a stream = struct
+  type 'a w = 'a stream
+  let rec duplicate (Cons (x, xs)) = Cons (Cons (x, xs), Lazy.from_val (duplicate (Lazy.force xs)))
+end
+
+(* Generate full Comonad Instance *)
+module StreamComonad : Comonad with type 'a w = 'a stream = ComonadImplViaExtend(StreamComonadBase(StreamFunctor))(StreamComonadDuplicate)
+```
+- Analog of advance
+```ocaml
+let tail (Cons (_, xs)) = Lazy.force xs
+```
+- sum
+```ocaml
+let rec sum_s n (Cons (x, xs)) = 
+  if n <= 0 then 0 else x + sum_s (n - 1) (Lazy.force xs)
+```
+- average
+```ocaml
+let average n stm = Float.(of_int (sum_s n stm) /. of_int n)
+```
+- movingAverage
+```ocaml
+let moving_average n = StreamComonad.extend (average n)
 ```
