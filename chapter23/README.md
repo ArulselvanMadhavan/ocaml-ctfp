@@ -7,6 +7,8 @@ module type Functor = sig
 end
 let id a = a
 let compose f g x = f (g x)
+type ('s, 'a) prod = Prod of 'a * 's
+type ('s, 'a) reader = Reader of ('s -> 'a)
 ```
 ## Introduction
 - Monad - composing kleisli arrows
@@ -180,4 +182,115 @@ let average n stm = Float.(of_int (sum_s n stm) /. of_int n)
 - movingAverage
 ```ocaml
 let moving_average n = StreamComonad.extend (average n)
+```
+### Comonad Categorically
+- NT reversed for comonad. E : T -> I and D : T -> T^2
+- components of these transformations correspond to extract and duplicate
+- Monad can be derived from adjunction - R `compose` L - Monad
+- L `compose` R - Comonad
+- counit of the adjunction - E : L `compose` R -> I - extract
+- D : L `compose` R `compose` L `compose` R - duplicate
+- monad is a monoid
+- Is Comonad a `comonoid`
+- `monoid` - an object in the monoidal category
+- U : m * m -> m
+- N : i -> m
+- Comonoid - Reversing the above morphisms
+- D : m -> m * m
+- E : m -> i
+```ocaml
+module type Comonoid = sig
+  type m
+  val split : m -> m * m
+  val destroy : m -> unit
+end
+```
+- destroy
+```ocaml
+let destroy _ = ()
+```
+- split
+```OCaml
+let split x = (f x, g x)
+```
+- Comonoid laws dual to monoid laws
+```OCaml
+(* lambda is the left unitor and rho is the right unitor *)
+(* <.> is used as compose below *)
+lambda <.> (bimap destroy id) <.> split = id
+rho <.> (bimap id destroy) <.> split = id
+```
+- Plugging in the definitions
+```OCaml
+lambda (bimap destroy id (split x))
+  = lambda (bimap destroy id (f x, g x))
+  = lambda ((), g x)
+  = g x
+```
+- So we can conclude that g = id and f = id
+- split becomes
+```ocaml
+let split x = (x, x)
+```
+- Every object is a trivial comonoid
+- Monad is a monoid in the category of endofunctors
+- Comonad is a Comonoid in the category of endofunctors
+### Store Comonad
+- Dual of a state monad - store comonad
+- L z = z * s
+- R a = s => a
+- For costate(Store) comonad
+- Comonad - L `compose` R
+- L (R a) = (s => a) * s
+- Prod as L and Reader as R
+```ocaml
+type ('s, 'a) store = Store of (('s -> 'a) * 's)
+```
+- counit of the adjunction Ea : ((s => a) * s) -> a
+```ocaml
+let counit (Prod (Reader f, s)) = f s
+```
+- extract function
+```ocaml
+let extract (Store (f, s)) = f s
+```
+- unit of adjunction
+```ocaml
+let unit a = Reader (fun s -> Prod (a, s))
+```
+- Partial construction of Store
+```ocaml
+let make_store f = fun s -> Store (f, s)
+```
+- duplicate - D : L `compose` R -> L `compose` R `compose` L `compose` R -> L `compose` Eta `compose` R
+```ocaml
+let duplicate (Store (f, s)) = Store (make_store f, s)
+```
+- complete defintion
+```ocaml
+module StoreComonadBase(S: sig type s end)(F: Functor with type 'a t = (S.s, 'a) store):ComonadBase with type 'a w = (S.s, 'a) store = struct
+  type 'a w = (S.s, 'a) store
+  include F
+  let extract (Store (f, s)) = f s
+end
+
+module StoreComonadDuplicate(S: sig type s end) : ComonadDuplicate with type 'a w = (S.s, 'a) store = struct
+  type 'a w = (S.s, 'a) store
+  let duplicate (Store (f, s)) = Store (make_store f, s)
+end
+
+(* Generate Full comonad *)
+module StoreComonad(S : sig type s end)(F:Functor with type 'a t = (S.s, 'a) store) : Comonad with type 'a w = (S.s, 'a) store = ComonadImplViaExtend(StoreComonadBase(S)(F))(StoreComonadDuplicate(S));;
+```
+- Reader of the store - generalized container of `a`s that are keyed using elements of type s
+- Second argument of the store - current position in the stream
+- duplicate - creates an infinite stream indexed by an element of type s
+- Basis for Lens
+```OCaml
+'a -> ('s, 'a) store
+```
+- Equivalent to
+```OCaml
+val get : 'a -> 's
+val set : 'a -> 's -> 'a
 ```
