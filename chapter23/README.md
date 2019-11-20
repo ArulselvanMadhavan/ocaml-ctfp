@@ -118,11 +118,13 @@ module type Comonad = sig
 end
 
 (* Construct a full comonad instance using one of the following modules *)
-module rec ComonadImplViaExtend: functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> struct
+module ComonadImplViaExtend: functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(D:ComonadDuplicate with type 'a w = 'a C.w) -> struct
   include C
   include D
   let extend f wa = (C.fmap f) (D.duplicate wa)
-end and ComonadImplViaDuplicate: functor (C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> struct
+end
+
+module ComonadImplViaDuplicate: functor (C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> Comonad with type 'a w = 'a C.w = functor(C:ComonadBase)(E:ComonadExtend with type 'a w = 'a C.w) -> struct
   include C
   include E
   let duplicate (wa : 'a w):'a w w = E.extend id wa
@@ -280,7 +282,7 @@ module StoreComonadDuplicate(S: sig type s end) : ComonadDuplicate with type 'a 
 end
 
 (* Generate Full comonad *)
-module StoreComonad(S : sig type s end)(F:Functor with type 'a t = (S.s, 'a) store) : Comonad with type 'a w = (S.s, 'a) store = ComonadImplViaExtend(StoreComonadBase(S)(F))(StoreComonadDuplicate(S));;
+module StoreComonad(S : sig type s end)(F:Functor with type 'a t = (S.s, 'a) store) : Comonad with type 'a w = (S.s, 'a) store = ComonadImplViaExtend(StoreComonadBase(S)(F))(StoreComonadDuplicate(S))
 ```
 - Reader of the store - generalized container of `a`s that are keyed using elements of type s
 - Second argument of the store - current position in the stream
