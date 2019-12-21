@@ -1,23 +1,28 @@
 # F-Algebras
 ## Utilities used by code below
 ```ocaml
+module Algebra : Algebra = functor (F : sig type 'a f end) -> struct
+  type 'a algebra = 'a F.f -> 'a
+end
+module Algebra : Algebra = functor (F : sig type 'a f end) -> struct
+  type 'a algebra = 'a F.f -> 'a
+end
 ```
 ### Introduction
 - Monoid - set, single object category, object in monoidal category
 - F Algebra
 ```ocaml
-module type FAlgebra = sig
-  type 'a f (* parameterized type *)
-  type 'a algebra = 'a f -> 'a
+module type Algebra = functor(F : sig type 'a f end) -> sig
+  type 'a algebra = 'a F.f -> 'a
 end
 ```
 - MonoidF functor
 ```ocaml
-type 'a monF = MEmpty | Mappend of ('a * 'a)
+type 'a mon_f = MEmpty | Mappend of ('a * 'a)
 ```
 - RingF functor
 ```ocaml
-type 'a ringF = RZero 
+type 'a ring_f = RZero 
 | ROne 
 | RAdd of ('a * 'a) 
 | RMul of ('a * 'a) 
@@ -25,14 +30,50 @@ type 'a ringF = RZero
 ```
 - evalZ function
 ```ocaml
-module EvalZ : FAlgebra = struct
-  type 'a f = 'a ringF
-  type 'a algebra = 'a f -> 'a
-  let evalZ : 'int algebra = function
-  | RZero -> 0
-  | ROne -> 1
-  | RAdd (m, n) -> m + n
-  | RMul (m, n) -> m * n
-  | RNeg n -> -n
+module Ring = struct
+
+  module RingAlg = Algebra(struct type 'a f = 'a ring_f end)
+
+  let eval_z : 'a RingAlg.algebra = function
+    | RZero -> 0
+    | ROne  -> 1
+    | RAdd (m, n) -> m + n
+    | RMul (m, n) -> m * n
+    | RNeg n -> -n
 end
+```
+- Recursion
+```ocaml
+type expr =
+    RZero
+  | ROne
+  | RAdd of (expr * expr)
+  | RMul of (expr * expr)
+  | RNeg of expr
+```
+- Ring Evaluator with a recursive definition
+```ocaml
+  let rec eval_z : expr -> int = function
+    | RZero -> 0
+    | ROne  -> 1
+    | RAdd (e1, e2) -> eval_z e1 + eval_z e2
+    | RMul (e1, e2) -> eval_z e1 * eval_z e2
+    | RNeg e -> -(eval_z e)
+end
+```
+- Depth-one tree
+```ocaml
+type 'a ring_f1 = ('a ring_f) ring_f
+```
+- Depth two tree
+```ocaml
+type 'a ring_f2 = (('a ring_f) ring_f) ring_f
+```
+- D2 via D1
+```ocaml
+type 'a ring_f2 = 'a ring_f ring_f1
+```
+- Applying an endofunctor infinitely many times produces a fixed point
+```ocaml
+
 ```
