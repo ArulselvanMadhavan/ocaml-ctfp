@@ -75,5 +75,17 @@ type 'a ring_f2 = 'a ring_f ring_f1
 ```
 - Applying an endofunctor infinitely many times produces a fixed point
 ```ocaml
-
+type 'a fix = Fix of ('a -> 'a fix)
+```
+- Constructor name - Fix is a convention
+```ocaml
+type 'a fix = In of ('a -> 'a fix)
+```
+- Fix as a function
+```ocaml
+let fix_const : 'a. ('a -> 'a fix) -> 'a fix = fun f -> Fix f
+```
+- unfix
+```ocaml
+let unfix : 'a.'a fix -> ('a -> 'a fix) = fun (Fix f) -> f
 ```
