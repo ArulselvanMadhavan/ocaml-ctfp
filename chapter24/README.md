@@ -201,3 +201,37 @@ let sum_alg = function
 let sum xs = List.fold_right (fun e s -> e +. s) xs 0.0
 ```
 ### CoAlgebras
+- Direction of the morphism is reversed
+- a -> F a
+- Coalgebras for a given functor also form a category
+- Homomorphisms preserve the coalgebraic structure
+- The terminal object (t, u) is the final coalgebra
+- For every alg (a, f), there is a unique homomorphism m such that
+- u : t -> F t; m : a -> t; F m : F a -> F t; f : a -> F a
+- Terminal coalgebra is a fixed point of the functor
+- morphism : u : t -> F t is an isomorphism
+- Terminal coalgebra -> recipe for generating infinite data structures
+- Cata is used to evaluate initial algebra
+- Ana is used to evaluate final coalgebra
+```ocaml
+module Ana(F:Functor) = struct
+
+  type 'a fix = Fix of ('a fix) F.t
+  
+  let rec ana : 'a. ('a -> 'a F.t) -> 'a -> 'a fix = fun coalg a -> Fix (F.fmap (ana coalg) (coalg a))
+end
+```
+- Stream as an example
+```ocaml
+type ('e, 'a) stream_f = StreamF of ('e * 'a)
+
+module Stream_Functor(E : sig type e end) : Functor = struct
+  type 'a t = (E.e, 'a) stream_f
+  let fmap f = function
+    | StreamF (e, a) -> StreamF (e, f a)
+end
+```
+- Fixed point
+```ocaml
+type 'e stream = Stream of ('e * 'e stream)
+```
