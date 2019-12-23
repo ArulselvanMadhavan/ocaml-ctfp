@@ -172,3 +172,32 @@ let rec fib = function
   | SuccF (m, n) -> (n, m + n)
 ```
 - Algebra for NatF defines the recurrence relation and the catmorphism just evaluates the n-th element of that sequence
+### Folds
+```ocaml
+type ('e, 'a) list_f = NilF | ConsF of ('e * 'a)
+```
+- Replacing 'a with the result of recursion - 'e list
+```ocaml
+type 'a list = Nil | Cons of ('e * 'e list)
+```
+- Algebra for a list functor picks a particular carrier type and defines a function that does pattern matching on the two constructors
+```ocaml
+let len_alg = function
+  | ConsF (e, n) -> n + 1
+  | NilF -> 0
+```
+- Traditional list length
+```ocaml
+let length xs = List.fold_right (fun e n -> n + 1) xs 0
+```
+- Two arguments to fold_r are the two components of the algebra
+```ocaml
+let sum_alg = function
+  | ConsF (e, s) -> e +. s
+  | NilF -> 0.0
+```
+- sum using foldr
+```ocaml
+let sum xs = List.fold_right (fun e s -> e +. s) xs 0.0
+```
+### CoAlgebras
