@@ -225,7 +225,7 @@ end
 ```ocaml
 type ('e, 'a) stream_f = StreamF of ('e * 'a)
 
-module Stream_Functor(E : sig type e end) : Functor = struct
+module Stream_Functor(E : sig type e end) : Functor with type 'a t = (E.e, 'a) stream_f = struct
   type 'a t = (E.e, 'a) stream_f
   let fmap f = function
     | StreamF (e, a) -> StreamF (e, f a)
@@ -235,3 +235,60 @@ end
 ```ocaml
 type 'e stream = Stream of ('e * 'e stream)
 ```
+- Generating Sieve of eratosthenes
+```ocaml
+(* OCaml library Gen provides infinite data structures *)
+let era : int Gen.t -> (int, int Gen.t) stream_f = 
+  fun ilist ->
+  let notdiv = fun p n -> (mod) n p != 0 in
+  let p = Gen.get_exn ilist in
+  StreamF (p, Gen.filter (notdiv p) ilist)
+```
+- Primes
+```ocaml
+module Stream_Int = Stream_Functor(struct type e = int end);;
+module Ana_Stream = Ana(Stream_Int)
+
+(* The fixpoint translated to OCaml is eager in its evaluation. 
+ So executing the following function will cause overflow *)
+let primes = AnaStream.ana era (Gen.init (fun i -> i + 2))
+```
+- to_list_c
+```ocaml
+module List_C(E : sig type e end) = struct
+  module Stream_F: Functor with type 'a t = (E.e, 'a) stream_f = Stream_Functor(E)
+  module Cata_Stream = Cata(Stream_F)
+  
+  let to_list_c : E.e list Cata_Stream.fix -> E.e list = 
+    fun s_fix ->
+    Cata_Stream.cata (fun (StreamF (e, a)) -> e :: a) s_fix
+
+end
+```
+- Fixed point is the initial algebra and final coalgebra
+- Endofunctor may have many fixed points
+- Initial algebra is the least fixed point
+- Final Coalgebra is the greatest fixed point
+- unfold
+```OCaml
+(* Gen.t is used to represent infinite data structures like haskell's lazy list *)
+val unfold : ('b -> ('a * 'b) option) -> 'b -> 'a Gen.t
+```
+- A lens can be represented as a pair of getter and setter.
+- set
+```OCaml
+val set : 'a -> 's -> 'a
+val get : 'a -> 's
+```
+- a is a product type; s is the field type
+- (a, (s, s -> a))
+```OCaml
+'a -> ('s, 'a) store
+```
+- Functor
+```ocaml
+(* Store is the comonad version of State *)
+type ('s, 'a) store = Store of (('s -> 'a), 's)
+```
+- Lens is a coalgebra for functor with carrier type a
+- Lens is a coalgebra that is compatible with comonad structure 
