@@ -1,7 +1,7 @@
 # F-Algebras
-## Utilities used by code below
+### Utilities used by code below
 ```ocaml
-module Algebra : Algebra = functor (F : sig type 'a f end) -> struct
+module type Algebra = functor (F : sig type 'a f end) -> sig
   type 'a algebra = 'a F.f -> 'a
 end
 module Algebra : Algebra = functor (F : sig type 'a f end) -> struct
@@ -63,7 +63,6 @@ type expr =
     | RAdd (e1, e2) -> eval_z e1 + eval_z e2
     | RMul (e1, e2) -> eval_z e1 * eval_z e2
     | RNeg e -> -(eval_z e)
-end
 ```
 - Depth-one tree
 ```ocaml
@@ -79,19 +78,29 @@ type 'a ring_f2 = 'a ring_f ring_f1
 ```
 - Applying an endofunctor infinitely many times produces a fixed point
 ```ocaml
-type 'a fix = Fix of ('a -> 'a fix)
+module Fix(F : Functor) = struct
+    type 'a fix = Fix of (('a fix) F.t)
+end
 ```
 - Constructor name - Fix is a convention
 ```ocaml
-type 'a fix = In of ('a -> 'a fix)
+module Fix(F : Functor) = struct
+    type 'a fix = In of (('a fix) F.t)
+end
 ```
 - Fix as a function
 ```ocaml
-let fix_const : 'a. ('a -> 'a fix) -> 'a fix = fun f -> Fix f
+module Fix(F : Functor) = struct
+    type 'a fix = Fix of (('a fix) F.t)
+    let fix : 'a. 'a fix F.t -> 'a fix = fun f -> Fix f
+end
 ```
 - unfix
 ```ocaml
-let unfix : 'a.'a fix -> ('a -> 'a fix) = fun (Fix f) -> f
+module Fix(F : Functor) = struct
+    type 'a fix = Fix of (('a fix) F.t)
+    let unfix : 'a.'a fix -> 'a fix F.t = fun (Fix f) -> f
+end
 ```
 ### Category of F-Algebras
 - F Algebras form a category
@@ -178,7 +187,7 @@ type ('e, 'a) list_f = NilF | ConsF of ('e * 'a)
 ```
 - Replacing 'a with the result of recursion - 'e list
 ```ocaml
-type 'a list = Nil | Cons of ('e * 'e list)
+type 'e list' = Nil | Cons of ('e * 'e list')
 ```
 - Algebra for a list functor picks a particular carrier type and defines a function that does pattern matching on the two constructors
 ```ocaml
@@ -246,12 +255,13 @@ let era : int Gen.t -> (int, int Gen.t) stream_f =
 ```
 - Primes
 ```ocaml
-module Stream_Int = Stream_Functor(struct type e = int end);;
+module Stream_Int = Stream_Functor(struct type e = int end)
 module Ana_Stream = Ana(Stream_Int)
 
 (* The fixpoint translated to OCaml is eager in its evaluation. 
- So executing the following function will cause overflow *)
-let primes = AnaStream.ana era (Gen.init (fun i -> i + 2))
+Hence, executing the following function will cause overflow.
+So, wrapping it inside a lazy *)
+let primes = lazy (Ana_Stream.ana era (Gen.init (fun i -> i + 2)))
 ```
 - to_list_c
 ```ocaml
@@ -281,14 +291,16 @@ val set : 'a -> 's -> 'a
 val get : 'a -> 's
 ```
 - a is a product type; s is the field type
-- (a, (s, s -> a))
+```OCaml
+(a, (s, s -> a))
+```
 ```OCaml
 'a -> ('s, 'a) store
 ```
 - Functor
 ```ocaml
 (* Store is the comonad version of State *)
-type ('s, 'a) store = Store of (('s -> 'a), 's)
+type ('s, 'a) store = Store of ('s -> 'a) * 's
 ```
 - Lens is a coalgebra for functor with carrier type a
 - Lens is a coalgebra that is compatible with comonad structure 

@@ -22,4 +22,22 @@ let compose f g x = f (g x)
 compose alg return = id
 compose alg join = compose alg (fmap alg)
 ```
-- 
+- Algebra for a list endofunctor
+  - type a
+  - function that produces a from [a]
+- foldr can be used to express that algebra
+```OCaml
+val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
+```
+- List Algebra - foldr f z 
+```OCaml
+(* List module in the OCaml standard library accepts list before z *)
+List.fold_right f [x] z = f x z
+```
+- List Algebra is compatible with the monad if
+```OCaml
+f x z = x
+```
+- z is the right unit
+### T-algebras
+
