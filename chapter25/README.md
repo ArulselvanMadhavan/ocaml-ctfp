@@ -2,6 +2,16 @@
 ### Utilities used by code below
 ```ocaml
 let compose f g x = f (g x)
+module type Functor = sig
+  type 'a t
+  val fmap : ('a -> 'b) -> 'a t -> 'b t
+end
+module type Comonad = sig
+  type 'a w
+  include Functor with type 'a t := 'a w
+  val extract : 'a w -> 'a
+  val duplicate : 'a w -> 'a w w
+end
 ```
 ### Introduction
 - Endofunctors - defines expressions
@@ -118,3 +128,63 @@ end
 - THere is a whole category of adjunctions Adj(C, T) that result in monad T on C
 - Kleisli adjunction is the initial object in this category
 - EM adjunction is the terminal object in this category
+### Coalgebras for Comonads
+- coa : a -> W a
+- E(extract) and D(duplicate) are the nat trans defining comonad.
+### Lenses
+- A lens can be written as a coalgebra
+- coalg_s :: a -> ('s, 'a) store
+```ocaml
+type ('s, 'a) store = Store of ('s -> 'a) * 's
+```
+- Coalgebra as a pair of functions
+  - set : 'a -> 's -> 'a
+  - get : 'a -> 's
+- coalg_s a = Store ((set a), (get a))
+- Store is a comonad
+```ocaml
+module Store_comonad(S: sig type s end)(F : Functor with type 'a t = (S.s, 'a) store) : Comonad with type 'a w = (S.s, 'a) store = struct
+  type 'a w = (S.s, 'a) store
+  include F
+  let extract : 'a w -> 'a = fun (Store (f, s)) -> f s
+  let duplicate : 'a w -> ('a w) w = fun (Store (f, s)) -> Store ((fun s -> Store (f, s)), s)
+end
+```
+- When is a lens a coalgebra?
+```ocaml
+module Store_Functor(S : sig type s end) : Functor with type 'a t = (S.s, 'a) store = struct
+  type 'a w = (S.s, 'a) store
+  type 'a t = 'a w
+  
+  let fmap g (Store (f, s)) = Store ((compose g f), s)
+end
+```
+- coalg_s a = Store ((set a), (get a))
+- fmap coalg to result of coalg
+```OCaml
+(* Assume <.> acts as compose *)
+Store ((coalg_store <.> set a), (get a))
+```
+- Applying duplicate to result of coalg
+```OCaml
+Store ((fun s -> Store (set a, s)), (get a))
+```
+- Coalg must be equal to arbitrary s
+```OCaml
+(* Pseudo OCaml *)
+let coalg_store (set a s) = Store ((set a), s)
+```
+- Expaning coalg
+```OCaml
+(* Expaning coalg_store *)
+Store ((set (set a s)), (get (set a s))) = Store ((set a), s)
+```
+- Using the lens laws#1
+```OCaml
+set (set a s) = set a
+```
+- Using lens law#2
+```OCaml
+get (set a s) = s
+```
+- A well-behaved lens is a comonad coalgebra for the Store functor
