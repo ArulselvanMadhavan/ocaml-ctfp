@@ -74,3 +74,47 @@ f x z = x
 - counit of this adjunction
   - E :: F^T `compose` U^T -> I
   - T-algebra (a, f)
+- Free algebra created bt F^T is (T a, U_a)
+- Forgetful functor F^T drops the evaluator
+  - U^T `compose` F^T = T
+- counit of the adjunction produces monadic multiplication
+  - U = R `compose` E `compose` L
+### Kleisli Category
+  - Kleisli category
+  - Constructed from C and a monad T - C_T
+  - Objects of C_T are objects of C but morphisms are different
+  - f_K from a to b in C_T corresponds to a morphism f from a to T b in C
+  - f_K is the kleisli arrow from a to b
+  - Composition of morphisms in the Kleisli category is defined in terms of monadic composition of Kleisli arrows
+  - In C_T
+    - f_K : a -> b
+    - g_K : b -> c
+  - In C
+    - f : a -> T b
+    - g : b -> T c
+  - Composition
+    - h_K = g_K `compose` f_K
+    - is a kleisli arrow in C
+    - h : a -> T c
+    - h = U `compose` T g `compose` f
+```OCaml
+module Kleisli_Composition(T : Monad) = struct
+  let h = T.join <.> T.fmap g <.> f
+end
+```
+- Functor F from C to C_T
+```OCaml
+module C_to_CT(T : Monad) = struct
+  let on_objects = compose T.return f
+end
+```
+- Functor G from C_T to C
+  - on_objects : a -> T a
+  - on_morphisms : f_K which corresponds to f : a -> T b in C
+    - It produces a morphism T a -> T b in C
+    - U at T b `compose` T f (Takes T a and produces T b)
+- Two functors F and G form an adjunction
+- G `compose` F forms the monad T
+- THere is a whole category of adjunctions Adj(C, T) that result in monad T on C
+- Kleisli adjunction is the initial object in this category
+- EM adjunction is the terminal object in this category
