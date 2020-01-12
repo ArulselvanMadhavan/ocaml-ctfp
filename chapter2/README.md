@@ -1,5 +1,5 @@
 # Types and Functions
-* Declare a variable and assing a type
+* Declare a variable and assign a type
 ```ocaml
 module type Chapter2_DeclareVariable = sig
   val x : int
