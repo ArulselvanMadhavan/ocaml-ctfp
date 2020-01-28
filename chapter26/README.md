@@ -78,7 +78,7 @@ end
 ```ocaml
 module Pi(P : Profunctor) = struct
   type rank2_p = { p : 'a. ('a, 'a) P.p }
-  let pi : 'c. rank2_p -> ('c, 'c) P.p = fun e -> e.p
+  let pi : rank2_p -> ('c, 'c) P.p = fun e -> e.p
 end
 ```
   - Generalization of a constant functor to a constant profunctor
@@ -90,8 +90,8 @@ end
   - Commutation conditions as equalizer.
 ```ocaml
 module EndsEqualizer(P : Profunctor) = struct
-  let lambda : 'a 'b. ('a, 'a) P.p -> ('a -> 'b) -> ('a, 'b) P.p = fun paa f -> P.dimap id f paa
-  let rho : 'a 'b. ('b, 'b) P.p -> ('a -> 'b) -> ('a, 'b) P.p = fun pbb f -> P.dimap f id pbb
+  let lambda : ('a, 'a) P.p -> ('a -> 'b) -> ('a, 'b) P.p = fun paa f -> P.dimap id f paa
+  let rho : ('b, 'b) P.p -> ('a -> 'b) -> ('a, 'b) P.p = fun pbb f -> P.dimap f id pbb
 end
 ```
   - prod p
@@ -112,8 +112,8 @@ end
 ```ocaml
 module EndsWithDiaProd(P : Profunctor)(D : DiaProd with type ('a, 'b) p = ('a, 'b) P.p)(PP : ProdP with type ('a, 'b) p = ('a, 'b) P.p) = struct
   module E = EndsEqualizer(P)
-  let lambdaP : 'a 'b. 'a D.diaprod -> ('a, 'b) PP.prod_p = fun (DiaProd paa) -> E.lambda paa
-  let rhoP : 'a 'b. 'b D.diaprod -> ('a, 'b) PP.prod_p = fun (DiaProd pbb) -> E.rho pbb
+  let lambdaP : 'a D.diaprod -> ('a, 'b) PP.prod_p = fun (DiaProd paa) -> E.lambda paa
+  let rhoP : 'b D.diaprod -> ('a, 'b) PP.prod_p = fun (DiaProd pbb) -> E.rho pbb
 end
 ```
 ### Natural Transformations as Ends
@@ -126,7 +126,7 @@ end
   - Naturality follows from parametricity
   - Coend
 ```ocaml
- module Coend(P : Profunctor) = struct
+module Coend(P : Profunctor) = struct
   type coend = Coend of {c : 'a. ('a, 'a) P.p }
 end
 ```
