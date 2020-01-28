@@ -62,7 +62,7 @@ type expr =
     | ROne  -> 1
     | RAdd (e1, e2) -> eval_z e1 + eval_z e2
     | RMul (e1, e2) -> eval_z e1 * eval_z e2
-    | RNeg e -> -(eval_z e)
+    | RNeg e -> - eval_z e
 ```
 - Depth-one tree
 ```ocaml
@@ -92,14 +92,14 @@ end
 ```ocaml
 module Fix(F : Functor) = struct
     type 'a fix = Fix of (('a fix) F.t)
-    let fix : 'a. 'a fix F.t -> 'a fix = fun f -> Fix f
+    let fix : 'a fix F.t -> 'a fix = fun f -> Fix f
 end
 ```
 - unfix
 ```ocaml
 module Fix(F : Functor) = struct
     type 'a fix = Fix of (('a fix) F.t)
-    let unfix : 'a.'a fix -> 'a fix F.t = fun (Fix f) -> f
+    let unfix : 'a fix -> 'a fix F.t = fun (Fix f) -> f
 end
 ```
 ### Category of F-Algebras
@@ -141,7 +141,7 @@ end
 - 1 + N -> N
 - As functor
 ```ocaml
-type 'a nat_f = ZeroF | SuccF of 'a;;
+type 'a nat_f = ZeroF | SuccF of 'a
 ```
 - Fixed point (Initial algebra)
 ```ocaml
@@ -163,10 +163,10 @@ type nat = Zero | Succ of nat
 - cata in OCaml
 ```ocaml
 module Cata(F : Functor) = struct
-  type 'a fix = Fix of (('a fix) F.t)
-  let fix : 'a. ('a fix) F.t -> 'a fix = fun f -> Fix f
-  let unfix : 'a. 'a fix -> 'a fix F.t = fun (Fix f) -> f
-  let rec cata : 'a. ('a F.t -> 'a) -> 'a fix -> 'a = fun alg fixf -> alg (F.fmap (cata alg) (unfix fixf))
+  type 'a fix = Fix of 'a fix F.t
+  let fix : 'a fix F.t -> 'a fix = fun f -> Fix f
+  let unfix : 'a fix -> 'a fix F.t = fun (Fix f) -> f
+  let rec cata : ('a F.t -> 'a) -> 'a fix -> 'a = fun alg fixf -> alg (F.fmap (cata alg) (unfix fixf))
 end
 ```
 - Functor for natural numbers
@@ -225,9 +225,9 @@ let sum xs = List.fold_right (fun e s -> e +. s) xs 0.0
 ```ocaml
 module Ana(F:Functor) = struct
 
-  type 'a fix = Fix of ('a fix) F.t
+  type 'a fix = Fix of 'a fix F.t
   
-  let rec ana : 'a. ('a -> 'a F.t) -> 'a -> 'a fix = fun coalg a -> Fix (F.fmap (ana coalg) (coalg a))
+  let rec ana : ('a -> 'a F.t) -> 'a -> 'a fix = fun coalg a -> Fix (F.fmap (ana coalg) (coalg a))
 end
 ```
 - Stream as an example
@@ -246,7 +246,10 @@ type 'e stream = Stream of ('e * 'e stream)
 ```
 - Generating Sieve of eratosthenes
 ```ocaml
-(* OCaml library Gen provides infinite data structures *)
+(* OCaml library `gen` provides useful helpers for 
+   potentially infinite iterators. You can install it
+   with `opam install gen`. To use it in the toplevel,
+   you need to `#require "gen"` *)
 let era : int Gen.t -> (int, int Gen.t) stream_f = 
   fun ilist ->
   let notdiv = fun p n -> (mod) n p != 0 in
