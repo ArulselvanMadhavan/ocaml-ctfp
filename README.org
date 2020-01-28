@@ -1,24 +1,24 @@
 * OCaml version of Category Theory For Programmers
 
-Resources I found useful as I started translating the book in OCaml:
-1. https://github.com/freebroccolo/ocaml-cats
-2. https://github.com/ocamllabs/higher
+** How do I get the book?
+   - Currently, the book can be download by cloning this fork -
+     https://github.com/ArulselvanMadhavan/milewski-ctfp-pdf and
+     running
+     #+BEGIN_SRC bash
+     cd src
+     make ocaml
+     #+END_SRC
 
-Thanks to @mseri for offering to do code review.
+** Acknowledgements
+   - Thanks to Marcello Seri @mseri for doing the code review. If @mseri
+     hadn't offered to do the code review, this project would not have started
+   - Thanks to @XVilka for promoting this effort in reddit, ocaml
+     forums and offering helpful links
+   - All the kind people in OCaml discord who hang out in the
+     #beginners channel answering questions
 
-If you find any mistakes or want to improve code snippets, please submit a PR.
+** Helpful Resources
+   - Resources I found useful as I started translating the book in OCaml:
+     1) https://github.com/freebroccolo/ocaml-cats
+     2) https://github.com/ocamllabs/higher
 
-** Completed work:
-- Chapters 1 through 20 are available in the pdf format here: https://github.com/hmemcpy/milewski-ctfp-pdf/pull/201
-
-** TODO:
-- I am currently using a modified version of `mdx` to move snippets
-  from this repo to the book repo -
-  https://github.com/ArulselvanMadhavan/milewski-ctfp-pdf/tree/ocaml .
-  Need to automate this and make it part of makefile
-  - Clone this repo
-  - Run the modified version of mdx to generate the snippets?(Or Check
-    in the snippets in this repo?) in each chapter
-  - Run ocamlformat
-  - Copy the snippets to the folders where the pdf generator looks for it.
-  - When the pdf is generated, remove the snippets
