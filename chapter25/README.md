@@ -2,9 +2,16 @@
 ### Utilities used by code below
 ```ocaml
 let compose f g x = f (g x)
+let ( <.> ) = compose
 module type Functor = sig
   type 'a t
   val fmap : ('a -> 'b) -> 'a t -> 'b t
+end
+module type MonadJoin = sig
+  type 'a t
+  include Functor with type 'a t := 'a t
+  val join : 'a t t -> 'a t
+  val return : 'a -> 'a t
 end
 module type Comonad = sig
   type 'a w
@@ -107,15 +114,15 @@ f x z = x
     - is a kleisli arrow in C
     - h : a -> T c
     - h = U `compose` T g `compose` f
-```OCaml
-module Kleisli_Composition(T : Monad) = struct
-  let h = T.join <.> T.fmap g <.> f
+```ocaml
+module Kleisli_Composition(T : MonadJoin) = struct
+  let h g f = T.join <.> T.fmap g <.> f
 end
 ```
 - Functor F from C to C_T
 ```OCaml
 module C_to_CT(T : Monad) = struct
-  let on_objects = compose T.return f
+  let on_objects = T.return <.> f
 end
 ```
 - Functor G from C_T to C
