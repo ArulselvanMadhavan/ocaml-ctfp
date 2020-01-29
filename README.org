@@ -5,6 +5,8 @@
      https://github.com/ArulselvanMadhavan/milewski-ctfp-pdf and
      running
      #+BEGIN_SRC bash
+     cd milewski-ctfp-pdf
+     git checkout ocaml
      cd src
      make ocaml
      #+END_SRC
